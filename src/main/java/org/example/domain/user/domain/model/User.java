@@ -1,4 +1,4 @@
-package org.example.auth.domain.model;
+package org.example.domain.user.domain.model;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -18,7 +18,7 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(unique = false)
+    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
@@ -30,11 +30,22 @@ public class User extends BaseEntity {
     private boolean isDeleted = false;
 
 
-    private User(Long id, String email, String password, String name, String nickname) {
-        this.id = id;
+    private User(String email, String password, String name, String nickname) {
         this.email = email;
         this.password = password;
         this.name = name;
+        this.nickname = nickname;
+    }
+
+
+    public static User of(String email, String password, String name, String nickname){
+
+        return new User(email,password,name,nickname);
+    }
+
+    //회원 정보 수정
+    public void update(String password, String nickname) {
+        this.password = password;
         this.nickname = nickname;
     }
 }
