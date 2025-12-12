@@ -1,4 +1,4 @@
-package org.example.auth.controller.dto;
+package org.example.domain.user.controller.dto;
 
 
 import jakarta.validation.constraints.Email;
