@@ -1,13 +1,11 @@
 package org.example.domain.user.controller.dto;
 
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.domain.user.domain.model.UserRole;
 
 
 @Getter
@@ -37,5 +35,8 @@ public class UserCreateRequestDto {
     @NotBlank
     @Size(min = 2 ,max = 10, message = "2 ~ 10글자 이하로 입력하세요")
     private String nickname;
+
+    @NotNull
+    private UserRole userRole;
 
 }
