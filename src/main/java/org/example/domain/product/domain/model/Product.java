@@ -75,18 +75,27 @@ public class Product extends BaseEntity {
                                int stock,
                        ProductStatus productStatus,
                        ProductCategory productCategory){
-         this.title = title;
-         this.contents = contents;
-         this.price = price;
-         this.stock = stock;
+
+        if (title != null) this.title = title;
+        if (contents != null) this.contents = contents;
+        if (price <= 0 ) {
+            throw new ProductException(ProductErrorCode.VALID_NON_ZERO_PRICE);
+        }
+        if (stock < 0 ) {
+            throw new ProductException(ProductErrorCode.VALID_NON_ZERO_STOCK);
+        }
+
+        this.price = price;
+
+        this.stock = stock;
         if (productStatus == OUT_OF_STOCK && stock != 0 ) {
             throw new ProductException(ProductErrorCode.INVALID_OUT_OF_STOCK_STATUS_CHANGE);
         }
         if (productStatus == ON_SALE && stock <= 0 ) {
             throw new ProductException(ProductErrorCode.INVALID_OUT_OF_STOCK_STATUS_CHANGE);
         }
-         this.productStatus = productStatus;
-         this.productCategory = productCategory;
+        if (productStatus != null) this.productStatus = productStatus;
+        if (productCategory != null)this.productCategory = productCategory;
     }
 
     public void updateProductStatus(ProductStatus productStatus) {
