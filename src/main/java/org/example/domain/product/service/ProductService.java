@@ -7,20 +7,13 @@ import org.example.domain.product.domain.model.Product;
 import org.example.domain.product.domain.repository.ProductRepository;
 import org.example.domain.product.exception.ProductErrorCode;
 import org.example.domain.product.exception.ProductException;
-import org.example.domain.user.domain.model.User;
 import org.example.domain.user.domain.repository.UserRepository;
 import org.example.domain.user.exception.UserErrorCode;
 import org.example.domain.user.exception.UserException;
-import org.springframework.boot.web.server.PortInUseException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
-
-import static org.example.domain.product.domain.model.ProductStatus.ON_SALE;
-import static org.example.domain.product.domain.model.ProductStatus.OUT_OF_STOCK;
 
 @Service
 @RequiredArgsConstructor
@@ -36,17 +29,9 @@ public class ProductService {
          userRepository.findByIdAndIsDeletedFalse(userId)
                          .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
 
-         if (productRepository.validateDuplicateTitle(requestDto.getTitle())) {
+         if (productRepository.existsByTitle(requestDto.getTitle())) {
              throw new ProductException(ProductErrorCode.DUPLICATE_PRODUCT_TITLE);
 
-         }
-
-         if ((requestDto.getPrice() <= 0 )) {
-             throw new ProductException(ProductErrorCode.VALID_NON_ZERO_PRICE);
-         }
-
-         if (requestDto.getStock() < 0) {
-             throw new ProductException(ProductErrorCode.VALID_NON_ZERO_STOCK);
          }
 
         Product product = Product.of(requestDto.getTitle(),
@@ -86,22 +71,12 @@ public class ProductService {
         Product product = productRepository.findByIdAndIsDeletedFalse(productId)
                 .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
 
-        if (requestDto.getPrice() <= 0) {
-            throw new ProductException(ProductErrorCode.VALID_NON_ZERO_PRICE);
-        }
-
-        if (requestDto.getStock() < 0 ) {
-            throw new ProductException(ProductErrorCode.VALID_NON_ZERO_STOCK);
-        }
-
-        if (productRepository.validateDuplicateTitle(requestDto.getTitle())) {
-            throw new ProductException(ProductErrorCode.DUPLICATE_PRODUCT_TITLE);
-        }
-
         product.update(requestDto.getTitle(),
                 requestDto.getContents(),
                 requestDto.getPrice(),
-                requestDto.getStock());
+                requestDto.getStock(),
+                requestDto.getProductStatus(),
+                requestDto.getProductCategory());
         
         return ProductResponseDto.from(product);
 
@@ -127,17 +102,7 @@ public class ProductService {
         Product product = productRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
 
-        if (requestDto.getProductStatus() == OUT_OF_STOCK) {
-            if (product.getStock() != 0) {
-                throw new ProductException(ProductErrorCode.INVALID_OUT_OF_STOCK_STATUS_CHANGE);
-            }
 
-        }
-        else if (requestDto.getProductStatus() == ON_SALE) {
-            if (product.getStock() <= 0) {
-                throw new ProductException(ProductErrorCode.INVALID_OUT_OF_STOCK_STATUS_CHANGE);
-            }
-            else
-        }
+        return ProductResponseDto.from(product);
     }
 }

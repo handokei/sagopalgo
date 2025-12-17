@@ -48,11 +48,12 @@ public class ProductController {
     }
 
     //제품 수정
-    @PatchMapping("/{id}")
+    @PatchMapping("/{productId}")
     public ResponseEntity<ProductResponseDto> updateProduct(
             @PathVariable Long productId,
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody ProductUpdateRequestDto requestDto
+            @RequestBody @Valid ProductUpdateRequestDto requestDto
+
     ) {
         ProductResponseDto responseDto = productService.update(productId, userDetails.getId(), requestDto);
 
@@ -65,7 +66,7 @@ public class ProductController {
     public ResponseEntity<ProductResponseDto> updateStatusProduct(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody ProductStatusUpdateRequestDto requestDto
+            @RequestBody @Valid ProductStatusUpdateRequestDto requestDto
     ) {
         Long userId = userDetails.getId();
         ProductResponseDto responseDto = productService.updateStatus(id,

@@ -28,10 +28,10 @@ public class ProductCreateRequestDto {
     @NotNull
     private int stock;
 
-    @NotBlank
+    @NotNull
     private ProductStatus productStatus;
 
-    @NotBlank
+    @NotNull
     private ProductCategory productCategory;
 
 

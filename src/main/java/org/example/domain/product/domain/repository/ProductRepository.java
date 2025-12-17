@@ -19,9 +19,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Page<Product> findByIsDeletedFalse(Pageable pageable);
 
-    boolean validateDuplicateTitle(String title);
-
-    boolean validateNonZeroPrice(int price);
-
-    boolean validateNonZeroStock(int stock);
+    boolean existsByTitle(String title);
 }
