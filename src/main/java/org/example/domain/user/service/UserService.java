@@ -32,7 +32,8 @@ public class UserService {
         User user = User.of(requestDto.getEmail(),
                 encodePassword,
                 requestDto.getName(),
-                requestDto.getNickname());
+                requestDto.getNickname(),
+                requestDto.getUserRole());
         userRepository.save(user);
     }
 
