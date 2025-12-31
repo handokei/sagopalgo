@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.domain.cart.controller.dto.CartCreateRequestDto;
 import org.example.domain.cart.controller.dto.CartResponseDto;
 import org.example.domain.cart.service.CartService;
+import org.example.domain.cart.support.CartOwner;
+import org.example.domain.cart.support.CartOwnerResolver;
 import org.example.global.security.jwt.CustomUserDetails;
 
 import org.springframework.data.domain.Page;
@@ -18,14 +20,20 @@ import org.springframework.web.bind.annotation.*;
 public class CartController {
 
     private final CartService cartService;
+    private final CartOwnerResolver cartOwnerResolver;
 
-    @PostMapping
+    @PostMapping("/items")
     public ResponseEntity<String> create(
             @AuthenticationPrincipal CustomUserDetails userDetails,
+           @CookieValue(value = "guestKey", required = false) String guestKey,
            @RequestBody @Valid CartCreateRequestDto requestDto
             ) {
-        Long userId = userDetails.getId();
-        cartService.createCartItem(userId,requestDto);
+        CartOwner owner = cartOwnerResolver.resolve(userDetails, guestKey);
+
+        cartService.addItemToCart(owner.ownerType(),
+                owner.ownerKey(),
+                requestDto);
+
         return ResponseEntity.ok("장바구니에 추가 되었습니다.");
     }
 
@@ -33,19 +41,32 @@ public class CartController {
     @GetMapping
     public ResponseEntity<Page<CartResponseDto>> getCartItems(
             @AuthenticationPrincipal CustomUserDetails userDetails,
+            @CookieValue(value = "guestKey", required = false) String guestKey,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Long userId = userDetails.getId();
-        Page<CartResponseDto> responseDto = cartService.getCartItems(userId,page, size);
+
+        CartOwner owner = cartOwnerResolver.resolve(userDetails,
+                guestKey);
+
+        Page<CartResponseDto> responseDto = cartService.getCartItems(owner.ownerType(),
+                owner.ownerKey(),
+                page,
+                size);
+
         return ResponseEntity.ok().body(responseDto);
     }
 
   @DeleteMapping("/items/{cartItemId}")
   public ResponseEntity<Void> deletedCartItem(
-          @PathVariable Long cartItemId
+          @PathVariable Long cartItemId,
+          @AuthenticationPrincipal CustomUserDetails userDetails,
+          @CookieValue(value = "guestKey", required = false) String guestKey
   )       {
-        cartService.deletedCartItem(cartItemId);
+
+      CartOwner owner = cartOwnerResolver.resolve(userDetails, guestKey);
+
+      cartService.deletedCartItem(owner.ownerType(),owner.ownerKey(),cartItemId);
         return ResponseEntity.noContent().build();
   }
 }
