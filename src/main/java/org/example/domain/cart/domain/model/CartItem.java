@@ -7,7 +7,8 @@ import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import org.example.domain.cart.exception.CartItemErrorCode;
+import org.example.domain.cart.exception.CartItemException;
 
 @Entity
 @Getter
@@ -36,6 +37,9 @@ public class CartItem {
     }
 
     public void increase(int quantity) {
+        if (quantity <= 0)  {
+            throw new CartItemException(CartItemErrorCode.ZERO_QUANTITY_EXCEPTION);
+        }
         this.quantity += quantity;
     }
 
