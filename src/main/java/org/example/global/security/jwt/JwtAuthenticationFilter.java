@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.global.security.auth.CustomUserDetailsService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -28,13 +29,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = resolveToken(request);
 
         if (token != null && jwtProvider.validateToken(token)) {
-            Long userId = jwtProvider.getUserId(token);
 
-            UserDetails userDetails = customUserDetailsService.loadUserById(userId);
-
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
+            Authentication authentication =
+                    jwtProvider.getAuthentication(token, customUserDetailsService);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }

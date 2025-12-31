@@ -2,6 +2,10 @@ package org.example.global.security.jwt;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.example.global.security.auth.CustomUserDetailsService;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -66,5 +70,22 @@ public class JwtProvider {
         } catch (Exception e) {
             return false;
         }
+
+
+    }
+
+    public Authentication getAuthentication(
+            String token,
+            CustomUserDetailsService userDetailsService
+    ) {
+        Long userId = getUserId(token);
+
+        UserDetails userDetails = userDetailsService.loadUserById(userId);
+
+        return new UsernamePasswordAuthenticationToken(
+                userDetails,
+                null,
+                userDetails.getAuthorities()
+        );
     }
 }
