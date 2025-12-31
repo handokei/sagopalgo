@@ -8,6 +8,7 @@ import org.example.domain.product.domain.model.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 
@@ -21,5 +22,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     boolean existsByTitle(String title);
 
-    Optional<String> findTitleByIdAndIsDeletedFalse(Long productId);
+    @Query("""
+            SELECT p.title
+            FROM Product p
+            WHERE p.id = :id
+            and p.isDeleted = FALSE
+            """
+    )
+    Optional<String> findTitleByIdAndIsDeletedFalse(Long id);
 }
