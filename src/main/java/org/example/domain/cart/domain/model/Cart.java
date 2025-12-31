@@ -8,7 +8,6 @@ import org.example.global.config.entity.BaseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "carts")
@@ -32,9 +31,17 @@ public class Cart extends BaseEntity {
     private List<CartItem> cartItems = new ArrayList<>();
 
 
-    public Cart(OwnerType ownerType, String ownerKey) {
+    protected Cart(OwnerType ownerType, String ownerKey) {
         this.ownerKey = ownerKey;
         this.ownerType = ownerType;
+    }
+
+
+    public static Cart create(OwnerType ownerType, String ownerKey) {
+        return new Cart(
+                ownerType,
+                ownerKey
+        );
     }
 
 
@@ -61,7 +68,9 @@ public class Cart extends BaseEntity {
         item.increase(quantity);
     }
 
-    public void removeItem(Long cartItemId) {
-        cartItems.removeIf(i -> i.getId().equals(cartItemId));
+    public boolean removeItem(Long cartItemId) {
+        boolean removed = cartItems.removeIf(i -> i.getId().equals(cartItemId));
+
+        return removed;
     }
 }
