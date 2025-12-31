@@ -78,7 +78,7 @@ public class ProductController {
     }
 
     //제품 삭제
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{productId}")
     public ResponseEntity<Void> deletedProduct(
             @PathVariable Long productId,
             @AuthenticationPrincipal CustomUserDetails userDetails
