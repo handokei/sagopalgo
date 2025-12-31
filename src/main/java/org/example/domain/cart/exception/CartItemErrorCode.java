@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum CartItemErrorCode implements ErrorCode {
 
-    CART_ITEM_NOT_FOUND_EXCEPTION(HttpStatus.UNAUTHORIZED, "장바구니 아이템을 찾을 수 없습니다.");
+    CART_ITEM_NOT_FOUND_EXCEPTION(HttpStatus.UNAUTHORIZED, "장바구니 아이템을 찾을 수 없습니다."),
+    ZERO_QUANTITY_EXCEPTION(HttpStatus.UNAUTHORIZED,"수량은 1개 이상이어야 합니다." );
 
 
     private final HttpStatus status;
