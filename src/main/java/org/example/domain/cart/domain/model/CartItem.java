@@ -48,6 +48,10 @@ public class CartItem {
     }
 
 
-
-
+    public void changeQuantity(int quantity) {
+        if (quantity < 1) {
+            throw new CartItemException(CartItemErrorCode.INVALID_QUANTITY);
+        }
+        this.quantity = quantity;
+    }
 }
