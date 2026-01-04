@@ -3,6 +3,7 @@ package org.example.domain.cart.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.domain.cart.controller.dto.CartCreateRequestDto;
+import org.example.domain.cart.controller.dto.CartItemUpdateRequestDto;
 import org.example.domain.cart.controller.dto.CartResponseDto;
 import org.example.domain.cart.service.CartService;
 import org.example.domain.cart.support.CartOwner;
@@ -69,4 +70,20 @@ public class CartController {
       cartService.deletedCartItem(owner.ownerType(),owner.ownerKey(),cartItemId);
         return ResponseEntity.noContent().build();
   }
+
+  //수량 변경 해야함. patch
+    @PatchMapping("/items/{cartItemId}")
+    public ResponseEntity<Void> updateCartItemQuantity(
+            @PathVariable Long cartItemId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @CookieValue(value = "guestKey", required = false) String guestKey,
+            @RequestBody @Valid CartItemUpdateRequestDto requestDto
+    ) {
+        CartOwner owner = cartOwnerResolver.resolve(userDetails, guestKey);
+
+        cartService.updateQuantity(owner.ownerType(),owner.ownerKey(),cartItemId,requestDto.getQuantity());
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

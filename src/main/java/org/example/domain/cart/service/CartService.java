@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.domain.cart.controller.dto.CartCreateRequestDto;
 import org.example.domain.cart.controller.dto.CartResponseDto;
 import org.example.domain.cart.domain.model.Cart;
+import org.example.domain.cart.domain.model.CartItem;
 import org.example.domain.cart.domain.model.OwnerType;
 import org.example.domain.cart.domain.repository.CartItemRepository;
 import org.example.domain.cart.domain.repository.CartRepository;
@@ -97,5 +98,21 @@ public class CartService {
         }
 
 
+    }
+
+    @Transactional
+    public void updateQuantity(OwnerType ownerType, String ownerKey, Long cartItemId, int quantity) {
+
+        Cart cart = cartRepository.findByCartItems_Id(cartItemId)
+                .orElseThrow(() -> new CartException(CartErrorCode.CART_NOT_FOUND_EXCEPTION));
+
+
+        cart.validateOwnership(ownerType,ownerKey);
+        CartItem cartItem = cart.getCartItems().stream()
+                .filter(item -> item.getId().equals(cartItemId))
+                .findFirst()
+                .orElseThrow(() -> new CartItemException(CartItemErrorCode.CART_ITEM_NOT_FOUND_EXCEPTION));
+
+        cartItem.changeQuantity(quantity);
     }
 }
