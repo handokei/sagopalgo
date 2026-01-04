@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.domain.cart.exception.CartErrorCode;
+import org.example.domain.cart.exception.CartException;
 import org.example.global.config.entity.BaseEntity;
 
 import java.util.ArrayList;
@@ -73,4 +75,11 @@ public class Cart extends BaseEntity {
 
         return removed;
     }
+
+    public void validateOwnership(OwnerType ownerType, String ownerKey) {
+        if (this.ownerType!= ownerType || !this.ownerKey.equals(ownerKey)) {
+            throw new CartException(CartErrorCode.CART_ACCESS_DENIED);
+        }
+    }
+
 }

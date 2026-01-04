@@ -12,4 +12,6 @@ import java.util.Optional;
 public interface CartRepository extends JpaRepository<Cart, Long> {
 
     Optional<Cart> findByOwnerTypeAndOwnerKey(OwnerType ownerType, String string);
+
+    Optional<Cart> findByCartItems_Id(Long cartItemId);
 }
