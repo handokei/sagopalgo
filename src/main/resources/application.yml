@@ -17,3 +17,11 @@ spring:
         use_sql_comments: true
         dialect: org.hibernate.dialect.MySQLDialect
 
+jwt:
+  secret:
+    key: *
+  access-token:
+    expiration:
+      access-token: 1800000 # 30 minutes
+      refresh-token: 1209600000 # 14 days
+
