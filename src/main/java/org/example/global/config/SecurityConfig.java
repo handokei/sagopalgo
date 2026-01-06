@@ -42,9 +42,13 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/users/register",
                                 "/api/users/login",
-                                "/api/carts/**"
+                                "/api/carts/guest/**"
                         ).permitAll()
-                        .requestMatchers("/api/orders/**").authenticated()
+
+                        .requestMatchers(HttpMethod.GET,"/api/products/**")
+                        .permitAll()
+                        .requestMatchers("/api/orders/**",
+                                "api/carts/me/**").authenticated()
                         .anyRequest().authenticated()
                 )
 
