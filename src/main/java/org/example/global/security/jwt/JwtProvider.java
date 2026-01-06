@@ -1,5 +1,5 @@
 package org.example.global.security.jwt;
-
+import org.springframework.beans.factory.annotation.Value;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.example.global.security.auth.CustomUserDetailsService;
@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
@@ -18,9 +19,8 @@ public class JwtProvider {
     private final long accessTokenExpire = 1000L * 60 * 30; // 30분
     private final long refreshTokenExpire = 1000L * 60 * 30; // 30분
 
-    public JwtProvider() {
-        // HS256 키 생성
-        this.key = Keys.secretKeyFor(io.jsonwebtoken.SignatureAlgorithm.HS256);
+    public JwtProvider(@Value("${jwt.secret.key}") String secret) {
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     // AccessToken 생성
