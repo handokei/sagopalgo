@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -65,8 +66,12 @@ public class CartService {
                     String productTitle = productRepository.findTitleByIdAndIsDeletedFalse(cartItem.getProductId())
                             .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
 
-                    return CartResponseDto.from(cartItem, productTitle);
+                    return productRepository
+                            .findTitleByIdAndIsDeletedFalse(cartItem.getProductId())
+                            .map(title -> CartResponseDto.from(cartItem, title))
+                            .orElse(null);
                 })
+                .filter(Objects::nonNull)
                 .toList();
 
 
