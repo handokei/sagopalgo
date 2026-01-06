@@ -5,9 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.domain.cart.controller.dto.CartCreateRequestDto;
 import org.example.domain.cart.controller.dto.CartItemUpdateRequestDto;
 import org.example.domain.cart.controller.dto.CartResponseDto;
+import org.example.domain.cart.domain.model.OwnerType;
 import org.example.domain.cart.service.CartService;
-import org.example.domain.cart.support.CartOwner;
-import org.example.domain.cart.support.CartOwnerResolver;
 import org.example.global.security.jwt.CustomUserDetails;
 
 import org.springframework.data.domain.Page;
@@ -21,67 +20,125 @@ import org.springframework.web.bind.annotation.*;
 public class CartController {
 
     private final CartService cartService;
-    private final CartOwnerResolver cartOwnerResolver;
 
-    @PostMapping("/items")
-    public ResponseEntity<String> create(
+    //로그인 유저
+    @PostMapping("/me/items")
+    public ResponseEntity<Void> create(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-           @CookieValue(value = "guestKey", required = false) String guestKey,
            @RequestBody @Valid CartCreateRequestDto requestDto
             ) {
-        CartOwner owner = cartOwnerResolver.resolve(userDetails, guestKey);
-
-        cartService.addItemToCart(owner.ownerType(),
-                owner.ownerKey(),
+        cartService.addItemToCart(OwnerType.USER,
+                userDetails.getId().toString(),
                 requestDto);
 
-        return ResponseEntity.ok("장바구니에 추가 되었습니다.");
+        return ResponseEntity.ok().build();
     }
 
-
-    @GetMapping
+    @GetMapping("/me")
     public ResponseEntity<Page<CartResponseDto>> getCartItems(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @CookieValue(value = "guestKey", required = false) String guestKey,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-
-        CartOwner owner = cartOwnerResolver.resolve(userDetails,
-                guestKey);
-
-        Page<CartResponseDto> responseDto = cartService.getCartItems(owner.ownerType(),
-                owner.ownerKey(),
+        Page<CartResponseDto> responseDto = cartService.getCartItems(
+                OwnerType.USER,
+                userDetails.getId().toString(),
                 page,
                 size);
 
         return ResponseEntity.ok().body(responseDto);
     }
 
-  @DeleteMapping("/items/{cartItemId}")
-  public ResponseEntity<Void> deletedCartItem(
-          @PathVariable Long cartItemId,
-          @AuthenticationPrincipal CustomUserDetails userDetails,
-          @CookieValue(value = "guestKey", required = false) String guestKey
+    @DeleteMapping("/me/items/{id}")
+    public ResponseEntity<Void> deletedCartItem(
+          @PathVariable Long id,
+          @AuthenticationPrincipal CustomUserDetails userDetails
   )       {
 
-      CartOwner owner = cartOwnerResolver.resolve(userDetails, guestKey);
 
-      cartService.deletedCartItem(owner.ownerType(),owner.ownerKey(),cartItemId);
+      cartService.deletedCartItem(OwnerType.USER,
+              userDetails.getId().toString(),
+              id);
+
         return ResponseEntity.noContent().build();
   }
 
   //수량 변경 해야함. patch
-    @PatchMapping("/items/{cartItemId}")
+    @PatchMapping("/me/items/{id}")
     public ResponseEntity<Void> updateCartItemQuantity(
-            @PathVariable Long cartItemId,
+            @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @CookieValue(value = "guestKey", required = false) String guestKey,
             @RequestBody @Valid CartItemUpdateRequestDto requestDto
     ) {
-        CartOwner owner = cartOwnerResolver.resolve(userDetails, guestKey);
+        cartService.updateQuantity(
+                OwnerType.USER,
+                userDetails.getId().toString(),
+                id,
+                requestDto.getQuantity());
+        return ResponseEntity.noContent().build();
+    }
 
-        cartService.updateQuantity(owner.ownerType(),owner.ownerKey(),cartItemId,requestDto.getQuantity());
+
+
+
+    /**
+     * 비로그인 Guest
+     */
+    //비로그인 유저
+
+    @PostMapping("/guest/items")
+    public ResponseEntity<Void> createForGuest(
+            @CookieValue(name = "guestKey") String guestKey,
+            @RequestBody @Valid CartCreateRequestDto requestDto
+    ) {
+        cartService.addItemToCart(OwnerType.GUEST,
+                guestKey,
+                requestDto);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/guest")
+    public ResponseEntity<Page<CartResponseDto>> getCartItemsForGuest(
+            @CookieValue(name = "guestKey") String guestKey,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<CartResponseDto> responseDto = cartService.getCartItems(
+                OwnerType.GUEST,
+                guestKey,
+                page,
+                size);
+
+        return ResponseEntity.ok().body(responseDto);
+    }
+
+    @DeleteMapping("/guest/items/{id}")
+    public ResponseEntity<Void> deletedCartItemForGuest(
+            @PathVariable Long id,
+            @CookieValue(name = "guestKey") String guestKey
+    )       {
+
+
+        cartService.deletedCartItem(OwnerType.GUEST,
+                guestKey,
+                id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    //수량 변경 해야함. patch
+    @PatchMapping("/guest/items/{id}")
+    public ResponseEntity<Void> updateCartItemQuantityForGuest(
+            @PathVariable Long id,
+            @CookieValue(name = "guestKey") String guestKey,
+            @RequestBody @Valid CartItemUpdateRequestDto requestDto
+    ) {
+        cartService.updateQuantity(
+                OwnerType.GUEST,
+                guestKey,
+                id,
+                requestDto.getQuantity());
         return ResponseEntity.noContent().build();
     }
 
