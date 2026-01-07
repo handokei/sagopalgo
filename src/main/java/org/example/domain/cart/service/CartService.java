@@ -13,6 +13,8 @@ import org.example.domain.cart.exception.CartErrorCode;
 import org.example.domain.cart.exception.CartException;
 import org.example.domain.cart.exception.CartItemErrorCode;
 import org.example.domain.cart.exception.CartItemException;
+import org.example.domain.product.domain.model.Product;
+import org.example.domain.product.domain.model.ProductStatus;
 import org.example.domain.product.domain.repository.ProductRepository;
 import org.example.domain.product.exception.ProductErrorCode;
 import org.example.domain.product.exception.ProductException;
@@ -42,8 +44,12 @@ public class CartService {
     @Transactional
     public void addItemToCart(OwnerType ownerType, String ownerKey, @Valid CartCreateRequestDto requestDto) {
 
-        productRepository.findByIdAndIsDeletedFalse(requestDto.getProductId())
+        Product product = productRepository.findByIdAndIsDeletedFalse(requestDto.getProductId())
                 .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
+
+        if (product.getProductStatus() != ProductStatus.ON_SALE) {
+            throw new CartException(CartErrorCode.NOT_SALE_PRODUCT_INVALID_ADD_CART_EXCEPTION);
+        }
 
         Cart cart = cartRepository.findByOwnerTypeAndOwnerKey(ownerType, ownerKey)
                 .orElseGet(() -> cartRepository.save(
@@ -56,6 +62,7 @@ public class CartService {
         );
     }
 
+    //product 품절 및 판매 중단 시 표시하는 것도 있어야할듯
     public Page<CartResponseDto> getCartItems(OwnerType ownerType, String ownerKey, int page, int size) {
 
         Cart cart = cartRepository.findByOwnerTypeAndOwnerKey(ownerType, ownerKey)
@@ -111,12 +118,19 @@ public class CartService {
         Cart cart = cartRepository.findByCartItems_Id(cartItemId)
                 .orElseThrow(() -> new CartException(CartErrorCode.CART_NOT_FOUND_EXCEPTION));
 
-
         cart.validateOwnership(ownerType,ownerKey);
         CartItem cartItem = cart.getCartItems().stream()
                 .filter(item -> item.getId().equals(cartItemId))
                 .findFirst()
                 .orElseThrow(() -> new CartItemException(CartItemErrorCode.CART_ITEM_NOT_FOUND_EXCEPTION));
+
+
+        Product product = productRepository.findByIdAndIsDeletedFalse(cartItem.getProductId())
+                .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
+
+        if (product.getProductStatus() != ProductStatus.ON_SALE) {
+            throw new CartException(CartErrorCode.NOT_SALE_PRODUCT_QUANTITY_CHANGE_EXCEPTION);
+        }
 
         cartItem.changeQuantity(quantity);
     }
