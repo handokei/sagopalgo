@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -32,8 +33,11 @@ public class ProductController {
     }
     //다건 조회
     @GetMapping
-    public ResponseEntity<Page<ProductResponseDto>> readAllProduct(Pageable pageable) {
-       Page<ProductResponseDto> responseDto = productService.readAll(pageable);
+    public ResponseEntity<Page<ProductResponseDto>> getProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) int likeCount) {
+       Page<ProductResponseDto> responseDto = productService.getProducts(page,size,likeCount);
        return ResponseEntity.ok().body(responseDto);
     }
 

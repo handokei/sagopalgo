@@ -11,6 +11,7 @@ import org.example.domain.user.domain.repository.UserRepository;
 import org.example.domain.user.exception.UserErrorCode;
 import org.example.domain.user.exception.UserException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,10 +49,15 @@ public class ProductService {
     }
 
 
-    public Page<ProductResponseDto> readAll(Pageable pageable) {
+    public Page<ProductResponseDto> getProducts(int page, int size, int likeCount) {
 
-        Page<Product> products = productRepository.findByIsDeletedFalse(pageable);
-        return products.map(ProductResponseDto::from);
+        Pageable pageable = PageRequest.of(page, size);
+
+
+        return productRepository.search(
+                likeCount,
+                pageable
+        ).map(ProductResponseDto::from);
     }
 
     public ProductResponseDto readOne(Long id) {
