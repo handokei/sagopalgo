@@ -1,16 +1,16 @@
 package org.example.domain.like.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.domain.like.controller.dto.ProductLikeResponseDto;
+import org.example.domain.like.controller.dto.ProductLikesCreateResponseDto;
 import org.example.domain.like.service.ProductLikeService;
 import org.example.global.security.jwt.CustomUserDetails;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/api/likes")
+@RequestMapping("/api/products")
 @RequiredArgsConstructor
 @RestController
 public class ProductLikeController {
@@ -18,16 +18,26 @@ public class ProductLikeController {
     private final ProductLikeService  productLikeService;
 
 
-    @PostMapping("/{id}")
-    public ResponseEntity<Void> create(
+    @PostMapping("/{id}/likes")
+    public ResponseEntity<ProductLikesCreateResponseDto> create(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails
             ) {
 
-        productLikeService.createLike(id, userDetails.getId());
+        ProductLikesCreateResponseDto responseDto = productLikeService.createLike(id, userDetails.getId());
+        return ResponseEntity.ok().body(responseDto);
 
-        return ResponseEntity.ok().build();
+    }
 
+    @GetMapping("/me/likes")
+    public ResponseEntity<Page<ProductLikeResponseDto>> getProductLikes(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<ProductLikeResponseDto> responseDto = productLikeService.getProductLikes(userDetails.getId(), page, size);
+
+        return ResponseEntity.ok().body(responseDto);
     }
 
 
