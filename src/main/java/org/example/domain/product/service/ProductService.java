@@ -49,13 +49,12 @@ public class ProductService {
     }
 
 
-    public Page<ProductResponseDto> getProducts(int page, int size, int likeCount) {
+    public Page<ProductResponseDto> getProducts(int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size);
 
 
         return productRepository.search(
-                likeCount,
                 pageable
         ).map(ProductResponseDto::from);
     }

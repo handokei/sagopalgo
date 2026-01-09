@@ -6,5 +6,5 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ProductCustomRepository {
-    Page<Product> search(int likeCount, Pageable pageable);
+    Page<Product> search(Pageable pageable);
 }
