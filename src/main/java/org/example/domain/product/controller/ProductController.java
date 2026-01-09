@@ -35,11 +35,12 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<Page<ProductResponseDto>> getProducts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size)
-    {
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String sort
+    ) {
 
         //카테고리도 추가해야한다!!
-       Page<ProductResponseDto> responseDto = productService.getProducts(page,size);
+       Page<ProductResponseDto> responseDto = productService.getProducts(page,size,sort);
        return ResponseEntity.ok().body(responseDto);
     }
 
