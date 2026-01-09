@@ -1,5 +1,6 @@
 package org.example.domain.product.domain.repository;
 
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.example.domain.like.domain.model.QProductLike;
@@ -21,7 +22,7 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Product> search(Pageable pageable) {
+    public Page<Product> search(Pageable pageable, String sort) {
         QProduct product = QProduct.product;
         QProductLike productLike = QProductLike.productLike;
         QOrderItem orderItem = QOrderItem.orderItem;
@@ -44,5 +45,19 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
                 .fetch();
 
         return new PageImpl<>(result);
+    }
+
+    private OrderSpecifier<?> getOrderSpecifier(String sort, QProduct product, QProductLike productLike, QOrderItem orderItem){
+        if (sort == null) {
+            return product.id.asc();
+        }
+
+        return switch (sort){
+            case "price_desc" -> product.price.desc();
+            case "price_asc" -> product.price.asc();
+            case "likes_count" -> productLike.count().desc();
+            case "order_count" ->  orderItem.count().desc();
+            default -> product.id.asc();
+        };
     }
 }
