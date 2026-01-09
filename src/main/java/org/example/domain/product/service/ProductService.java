@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.domain.product.controller.dto.*;
 import org.example.domain.product.domain.model.Product;
+import org.example.domain.product.domain.model.ProductCategory;
 import org.example.domain.product.domain.repository.ProductRepository;
 import org.example.domain.product.exception.ProductErrorCode;
 import org.example.domain.product.exception.ProductException;
@@ -49,14 +50,15 @@ public class ProductService {
     }
 
 
-    public Page<ProductResponseDto> getProducts(int page, int size, String sort) {
+    public Page<ProductResponseDto> getProducts(int page, int size, String sort, ProductCategory productCategory) {
 
         Pageable pageable = PageRequest.of(page, size);
 
 
         return productRepository.search(
                 pageable,
-                sort
+                sort,
+                productCategory
         ).map(ProductResponseDto::from);
     }
 

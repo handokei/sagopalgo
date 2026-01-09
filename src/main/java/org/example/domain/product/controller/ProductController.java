@@ -3,6 +3,7 @@ package org.example.domain.product.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.domain.product.controller.dto.*;
+import org.example.domain.product.domain.model.ProductCategory;
 import org.example.domain.product.service.ProductService;
 
 import org.example.global.security.jwt.CustomUserDetails;
@@ -36,11 +37,12 @@ public class ProductController {
     public ResponseEntity<Page<ProductResponseDto>> getProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String sort
-    ) {
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false)ProductCategory productCategory
+            ) {
 
         //카테고리도 추가해야한다!!
-       Page<ProductResponseDto> responseDto = productService.getProducts(page,size,sort);
+       Page<ProductResponseDto> responseDto = productService.getProducts(page,size,sort,productCategory);
        return ResponseEntity.ok().body(responseDto);
     }
 
