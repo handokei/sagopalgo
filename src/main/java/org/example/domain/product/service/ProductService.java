@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.domain.product.controller.dto.*;
 import org.example.domain.product.domain.model.Product;
+import org.example.domain.product.domain.model.ProductCategory;
 import org.example.domain.product.domain.repository.ProductRepository;
 import org.example.domain.product.exception.ProductErrorCode;
 import org.example.domain.product.exception.ProductException;
@@ -11,6 +12,7 @@ import org.example.domain.user.domain.repository.UserRepository;
 import org.example.domain.user.exception.UserErrorCode;
 import org.example.domain.user.exception.UserException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,10 +50,16 @@ public class ProductService {
     }
 
 
-    public Page<ProductResponseDto> readAll(Pageable pageable) {
+    public Page<ProductResponseDto> getProducts(int page, int size, String sort, ProductCategory productCategory) {
 
-        Page<Product> products = productRepository.findByIsDeletedFalse(pageable);
-        return products.map(ProductResponseDto::from);
+        Pageable pageable = PageRequest.of(page, size);
+
+
+        return productRepository.search(
+                pageable,
+                sort,
+                productCategory
+        ).map(ProductResponseDto::from);
     }
 
     public ProductResponseDto readOne(Long id) {
