@@ -3,6 +3,8 @@ package org.example.domain.product.domain.repository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.example.domain.like.domain.model.QProductLike;
+import org.example.domain.order.domain.model.QOrder;
+import org.example.domain.order.domain.model.QOrderItem;
 import org.example.domain.product.domain.model.Product;
 import org.example.domain.product.domain.model.QProduct;
 import org.springframework.data.domain.Page;
@@ -19,13 +21,24 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Product> search(int likeCount, Pageable pageable) {
+    public Page<Product> search(Pageable pageable) {
         QProduct product = QProduct.product;
         QProductLike productLike = QProductLike.productLike;
+        QOrderItem orderItem = QOrderItem.orderItem;
+
+
+        /**
+         * 통합: 좋아요수 , 주문수 , 가격 높은 순 낮은 순
+         */
         List<Product> result = queryFactory.selectFrom(product)
                 .leftJoin(productLike).on(productLike.id.eq(product.id))
+                .leftJoin(orderItem).on(orderItem.productId.eq(product.id))
                 .groupBy(product.id)
-                .having(productLike.count().goe(likeCount))
+                .orderBy(
+                        productLike.count().desc(),
+                        orderItem.count().desc(),
+                        product.price.desc()
+                )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
