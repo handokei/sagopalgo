@@ -1,6 +1,7 @@
 package org.example.domain.product.domain.repository;
 
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.example.domain.like.domain.model.QProductLike;
@@ -22,7 +23,7 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Product> search(Pageable pageable, String sort, ProductCategory productCategory) {
+    public Page<Product> search(Pageable pageable, String sort, ProductCategory productCategory, String keyword) {
         QProduct product = QProduct.product;
         QProductLike productLike = QProductLike.productLike;
         QOrderItem orderItem = QOrderItem.orderItem;
@@ -68,8 +69,21 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
             case "price_desc" -> product.price.desc();
             case "price_asc" -> product.price.asc();
             case "likes_count" -> productLike.count().desc();
-            case "order_count" ->  orderItem.count().desc();
+            case "popular" ->  orderItem.count().desc();
+            case "latest" -> product.createdAt.desc();
             default -> product.id.asc();
         };
     }
+
+    /**
+     * 검색
+     * 가격
+     */
+
+    private BooleanExpression titleContains(String keyword, QProduct product){
+        return keyword == null || keyword.isBlank()
+                ? null
+                : product.title.contains(keyword);
+    }
+
 }

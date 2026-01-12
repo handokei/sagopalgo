@@ -38,11 +38,12 @@ public class ProductController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false)ProductCategory productCategory
+            @RequestParam(required = false)ProductCategory productCategory,
+            @RequestParam(required = false)String keyword
             ) {
 
         //카테고리도 추가해야한다!!
-       Page<ProductResponseDto> responseDto = productService.getProducts(page,size,sort,productCategory);
+       Page<ProductResponseDto> responseDto = productService.getProducts(page,size,sort,productCategory,keyword);
        return ResponseEntity.ok().body(responseDto);
     }
 
