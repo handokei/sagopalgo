@@ -50,7 +50,7 @@ public class ProductService {
     }
 
 
-    public Page<ProductResponseDto> getProducts(int page, int size, String sort, ProductCategory productCategory) {
+    public Page<ProductResponseDto> getProducts(int page, int size, String sort, ProductCategory productCategory, String keyword) {
 
         Pageable pageable = PageRequest.of(page, size);
 
@@ -58,7 +58,8 @@ public class ProductService {
         return productRepository.search(
                 pageable,
                 sort,
-                productCategory
+                productCategory,
+                keyword
         ).map(ProductResponseDto::from);
     }
 
