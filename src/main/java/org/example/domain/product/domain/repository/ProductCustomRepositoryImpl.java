@@ -36,7 +36,8 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
                 .selectFrom(product)
                 .leftJoin(productLike).on(productLike.productId.eq(product.id))
                 .leftJoin(orderItem).on(orderItem.productId.eq(product.id))
-                .where(product.productCategory.eq(productCategory))
+                .where(product.productCategory.eq(productCategory),
+                        titleContains(keyword,product))
                 .groupBy(product.id)
                 .orderBy(
                         getOrderSpecifier(sort,
@@ -52,7 +53,8 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
         Long total = queryFactory
                 .select(product.count())
                 .from(product)
-                .where(product.productCategory.eq(productCategory))
+                .where(product.productCategory.eq(productCategory),
+                        titleContains(keyword,product))
                 .fetchOne();
         return new PageImpl<>(result,pageable, total);
 
@@ -86,4 +88,5 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
                 : product.title.contains(keyword);
     }
 
+    //
 }
