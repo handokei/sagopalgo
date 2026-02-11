@@ -5,17 +5,24 @@ spring:
     name: sagopalgo
 
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://localhost:3306/sagopalgo
+    username: ${username}
+    password: ${password}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
         use_sql_comments: true
         dialect: org.hibernate.dialect.MySQLDialect
 
+jwt:
+  secret:
+    key: ${jwt_key}
+  access-token:
+    expiration:
+      access-token: 1800000 # 30 minutes
+      refresh-token: 1209600000 # 14 days
