@@ -5,5 +5,6 @@ public enum NotificationType {
     ORDER_PAID,
     ORDER_SHIPPED,
     ORDER_COMPLETED,
-    ORDER_CANCELED
+    ORDER_CANCELED,
+    PRODUCT_DISCOUNT
 }
