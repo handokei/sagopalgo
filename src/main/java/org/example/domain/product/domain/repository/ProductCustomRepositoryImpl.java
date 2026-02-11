@@ -34,11 +34,12 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
          */
         List<Product> result = queryFactory
                 .selectFrom(product)
+                .leftJoin(product.seller).fetchJoin()
                 .leftJoin(productLike).on(productLike.productId.eq(product.id))
                 .leftJoin(orderItem).on(orderItem.productId.eq(product.id))
                 .where(categoryEquals(productCategory,product),
                         titleContains(keyword,product))
-                .groupBy(product.id)
+                .groupBy(product.id, product.seller.id)
                 .orderBy(
                         getOrderSpecifier(sort,
                                 product,

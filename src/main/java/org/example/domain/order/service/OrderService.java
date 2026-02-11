@@ -37,22 +37,23 @@ public class OrderService {
 
     @Transactional
     public OrderCreateResponseDto createOrder(Long userId, @Valid OrderCreateRequestDto requestDto) {
-    userRepository.findByIdAndIsDeletedFalse(userId)
-            .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
+        userRepository.findByIdAndIsDeletedFalse(userId)
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
 
-        Product product = productRepository.findByIdAndIsDeletedFalse(requestDto.getProductId())
+        Product product = productRepository.findByIdWithLock(requestDto.getProductId())
                 .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
+
+        product.decreaseStock(requestDto.getQuantity());
 
         OrderItem orderItem = OrderItem.of(requestDto.getProductId(),
                 product.getTitle(),
                 product.getPrice(),
                 requestDto.getQuantity());
 
-    Order order = Order.of(userId, List.of(orderItem));
+        Order order = Order.of(userId, List.of(orderItem));
         orderRepository.save(order);
 
         return OrderCreateResponseDto.from(order);
-    
     }
 
     public Page<OrderResponseDto> getOrders(Long userId, int page, int size) {
@@ -94,13 +95,20 @@ public class OrderService {
 
     @Transactional
     public OrderStatusResponseDto cancelOrder(Long userId, Long id) {
-    userRepository.findByIdAndIsDeletedFalse(userId)
-            .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
+        userRepository.findByIdAndIsDeletedFalse(userId)
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
 
         Order order = orderRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND_EXCEPTION));
 
         order.cancel();
+
+        for (OrderItem orderItem : order.getOrderItems()) {
+            Product product = productRepository.findByIdWithLock(orderItem.getProductId())
+                    .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
+            product.restoreStock(orderItem.getQuantity());
+        }
+
         return OrderStatusResponseDto.from(order);
     }
 
