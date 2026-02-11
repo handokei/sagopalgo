@@ -10,7 +10,7 @@ import org.example.global.config.entity.BaseEntity;
 @Entity
 @Table(name = "products_likes",
 uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "product_id"})
+        @UniqueConstraint(columnNames = {"user_id, product_id"})
 })
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ProductLike extends BaseEntity {
