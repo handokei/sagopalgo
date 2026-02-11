@@ -7,10 +7,13 @@ import org.example.domain.product.domain.model.ProductCategory;
 import org.example.domain.product.domain.model.ProductStatus;
 
 @Getter
-@AllArgsConstructor
 public class ProductCreateResponseDto {
 
     private Long id;
+
+    private Long sellerId;
+
+    private String sellerNickname;
 
     private String title;
 
@@ -26,6 +29,8 @@ public class ProductCreateResponseDto {
 
     public ProductCreateResponseDto(Product product) {
         this.id = product.getId();
+        this.sellerId = product.getSellerId();
+        this.sellerNickname = product.getSeller().getNickname();
         this.title = product.getTitle();
         this.contents = product.getContents();
         this.price = product.getPrice();

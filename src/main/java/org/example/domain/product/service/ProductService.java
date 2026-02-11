@@ -28,21 +28,21 @@ public class ProductService {
 
     @Transactional
     public ProductCreateResponseDto createProduct(Long userId, @Valid ProductCreateRequestDto requestDto) {
-         userRepository.findByIdAndIsDeletedFalse(userId)
-                         .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
+        var seller = userRepository.findByIdAndIsDeletedFalse(userId)
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
 
-         if (productRepository.existsByTitle(requestDto.getTitle())) {
-             throw new ProductException(ProductErrorCode.DUPLICATE_PRODUCT_TITLE);
+        if (productRepository.existsByTitle(requestDto.getTitle())) {
+            throw new ProductException(ProductErrorCode.DUPLICATE_PRODUCT_TITLE);
+        }
 
-         }
-
-        Product product = Product.of(requestDto.getTitle(),
+        Product product = Product.of(
+                seller,
+                requestDto.getTitle(),
                 requestDto.getContents(),
                 requestDto.getPrice(),
                 requestDto.getStock(),
                 requestDto.getProductStatus(),
                 requestDto.getProductCategory());
-
 
         productRepository.save(product);
 
@@ -73,12 +73,14 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponseDto update(Long productId, Long id, ProductUpdateRequestDto requestDto) {
-        userRepository.findByIdAndIsDeletedFalse(id)
+    public ProductResponseDto update(Long productId, Long userId, ProductUpdateRequestDto requestDto) {
+        userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
 
         Product product = productRepository.findByIdAndIsDeletedFalse(productId)
                 .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
+
+        product.validateSeller(userId);
 
         product.update(requestDto.getTitle(),
                 requestDto.getContents(),
@@ -86,31 +88,34 @@ public class ProductService {
                 requestDto.getStock(),
                 requestDto.getProductStatus(),
                 requestDto.getProductCategory());
-        
-        return ProductResponseDto.from(product);
 
+        return ProductResponseDto.from(product);
     }
 
     @Transactional
-    public void deleted(Long productId, Long id) {
-
-        userRepository.findByIdAndIsDeletedFalse(id)
+    public void deleted(Long productId, Long userId) {
+        userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
 
         Product product = productRepository.findByIdAndIsDeletedFalse(productId)
                 .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
 
-        product.delete();
+        product.validateSeller(userId);
 
+        product.delete();
     }
 
-    public ProductResponseDto updateStatus(Long id, Long userId, ProductStatusUpdateRequestDto requestDto) {
+    @Transactional
+    public ProductResponseDto updateStatus(Long productId, Long userId, ProductStatusUpdateRequestDto requestDto) {
         userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
 
-        Product product = productRepository.findByIdAndIsDeletedFalse(id)
+        Product product = productRepository.findByIdAndIsDeletedFalse(productId)
                 .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
 
+        product.validateSeller(userId);
+
+        product.updateProductStatus(requestDto.getProductStatus());
 
         return ProductResponseDto.from(product);
     }

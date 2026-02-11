@@ -11,6 +11,10 @@ public class ProductResponseDto {
 
     private Long id;
 
+    private Long sellerId;
+
+    private String sellerNickname;
+
     private String title;
 
     private String contents;
@@ -25,6 +29,8 @@ public class ProductResponseDto {
 
     public ProductResponseDto(Product product) {
         this.id = product.getId();
+        this.sellerId = product.getSellerId();
+        this.sellerNickname = product.getSeller().getNickname();
         this.title = product.getTitle();
         this.contents = product.getContents();
         this.price = product.getPrice();
