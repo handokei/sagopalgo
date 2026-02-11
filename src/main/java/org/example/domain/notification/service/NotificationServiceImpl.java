@@ -9,6 +9,7 @@ import org.example.domain.notification.exception.NotificationErrorCode;
 import org.example.domain.notification.exception.NotificationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,12 +19,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     @Transactional
     public void send(Long userId, NotificationType type, String message, Long referenceId) {
         Notification notification = Notification.of(userId, type, message, referenceId);
         notificationRepository.save(notification);
+
+        messagingTemplate.convertAndSendToUser(
+                userId.toString(),
+                "/queue/notifications",
+                NotificationResponseDto.from(notification)
+        );
     }
 
     public Page<NotificationResponseDto> getNotifications(Long userId, int page, int size) {
