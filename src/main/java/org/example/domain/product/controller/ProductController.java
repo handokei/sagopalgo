@@ -50,9 +50,11 @@ public class ProductController {
     //단건 조회
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponseDto> readOneProduct(
-            @PathVariable Long id
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        ProductResponseDto responseDto = productService.readOne(id);
+        Long userId = userDetails != null ? userDetails.getId() : null;
+        ProductResponseDto responseDto = productService.readOne(id, userId);
 
         return ResponseEntity.ok().body(responseDto);
     }
