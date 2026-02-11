@@ -2,7 +2,7 @@ package org.example.domain.notification.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.domain.notification.controller.dto.NotificationResponseDto;
-import org.example.domain.notification.service.NotificationService;
+import org.example.domain.notification.service.NotificationServiceImpl;
 import org.example.global.security.jwt.CustomUserDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +16,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class NotificationController {
 
-    private final NotificationService notificationService;
+    private final NotificationServiceImpl notificationService;
 
     @GetMapping
     public ResponseEntity<Page<NotificationResponseDto>> getNotifications(

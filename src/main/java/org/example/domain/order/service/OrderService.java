@@ -2,6 +2,8 @@ package org.example.domain.order.service;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.domain.notification.domain.model.NotificationType;
+import org.example.domain.notification.service.NotificationService;
 import org.example.domain.order.controller.dto.OrderCreateRequestDto;
 import org.example.domain.order.controller.dto.OrderCreateResponseDto;
 import org.example.domain.order.controller.dto.OrderResponseDto;
@@ -34,6 +36,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public OrderCreateResponseDto createOrder(Long userId, @Valid OrderCreateRequestDto requestDto) {
@@ -52,6 +55,9 @@ public class OrderService {
 
         Order order = Order.of(userId, List.of(orderItem));
         orderRepository.save(order);
+
+        notificationService.send(userId, NotificationType.ORDER_CREATED,
+                "주문이 생성되었습니다: " + order.getSummaryTitle(), order.getId());
 
         return OrderCreateResponseDto.from(order);
     }
@@ -89,8 +95,10 @@ public class OrderService {
 
         order.pay();
 
-        return OrderStatusResponseDto.from(order);
+        notificationService.send(userId, NotificationType.ORDER_PAID,
+                "결제가 완료되었습니다: " + order.getSummaryTitle(), order.getId());
 
+        return OrderStatusResponseDto.from(order);
     }
 
     @Transactional
@@ -109,6 +117,9 @@ public class OrderService {
             product.restoreStock(orderItem.getQuantity());
         }
 
+        notificationService.send(userId, NotificationType.ORDER_CANCELED,
+                "주문이 취소되었습니다: " + order.getSummaryTitle(), order.getId());
+
         return OrderStatusResponseDto.from(order);
     }
 
@@ -121,6 +132,10 @@ public class OrderService {
                 .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND_EXCEPTION));
 
         order.shipped();
+
+        notificationService.send(userId, NotificationType.ORDER_SHIPPED,
+                "배송이 시작되었습니다: " + order.getSummaryTitle(), order.getId());
+
         return OrderStatusResponseDto.from(order);
     }
 
@@ -133,6 +148,10 @@ public class OrderService {
                 .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND_EXCEPTION));
 
         order.completed();
+
+        notificationService.send(userId, NotificationType.ORDER_COMPLETED,
+                "배송이 완료되었습니다: " + order.getSummaryTitle(), order.getId());
+
         return OrderStatusResponseDto.from(order);
     }
 }
