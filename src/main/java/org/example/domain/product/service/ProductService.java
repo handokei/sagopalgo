@@ -2,6 +2,7 @@ package org.example.domain.product.service;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.domain.like.domain.repository.ProductLikeRepository;
 import org.example.domain.product.controller.dto.*;
 import org.example.domain.product.domain.model.Product;
 import org.example.domain.product.domain.model.ProductCategory;
@@ -14,6 +15,10 @@ import org.example.domain.user.exception.UserException;
 import org.example.domain.notification.domain.model.NotificationType;
 import org.example.domain.notification.service.NotificationService;
 import org.example.domain.viewhistory.service.ViewHistoryService;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +34,7 @@ public class ProductService {
     private final UserRepository userRepository;
     private final ViewHistoryService viewHistoryService;
     private final NotificationService notificationService;
+    private final ProductLikeRepository productLikeRepository;
 
 
     @Transactional
@@ -110,14 +116,19 @@ public class ProductService {
     }
 
     private void sendDiscountNotification(Product product, int oldPrice, int newPrice) {
-        var userIds = viewHistoryService.findUsersByProductId(product.getId());
-        int discountPercent = (int) ((1 - (double) newPrice / oldPrice) * 100);
-        String message = String.format("'%s' 상품이 %d%% 할인 중! (%,d원 → %,d원)",
-                product.getTitle(), discountPercent, oldPrice, newPrice);
+        // 조회한 사용자 + 찜한 사용자 (중복 제거)
+        Set<Long> userIds = Stream.concat(
+                viewHistoryService.findUsersByProductId(product.getId()).stream(),
+                productLikeRepository.findUserIdsByProductId(product.getId()).stream()
+        ).collect(Collectors.toSet());
 
-        for (Long viewedUserId : userIds) {
-            notificationService.send(viewedUserId, NotificationType.PRODUCT_DISCOUNT, message, product.getId());
-        }
+        int discountPercent = (int) ((1 - (double) newPrice / oldPrice) * 100);
+        String message = String.format("'%s' 상품이 %d%% 할인 중!",
+                product.getTitle(), discountPercent);
+
+        userIds.forEach(targetUserId ->
+                notificationService.send(targetUserId, NotificationType.PRODUCT_DISCOUNT, message, product.getId())
+        );
     }
 
     @Transactional
