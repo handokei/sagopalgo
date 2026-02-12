@@ -11,6 +11,9 @@ import org.example.domain.product.exception.ProductException;
 import org.example.domain.user.domain.repository.UserRepository;
 import org.example.domain.user.exception.UserErrorCode;
 import org.example.domain.user.exception.UserException;
+import org.example.domain.notification.domain.model.NotificationType;
+import org.example.domain.notification.service.NotificationService;
+import org.example.domain.viewhistory.service.ViewHistoryService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +27,8 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final ViewHistoryService viewHistoryService;
+    private final NotificationService notificationService;
 
 
     @Transactional
@@ -63,12 +68,16 @@ public class ProductService {
         ).map(ProductResponseDto::from);
     }
 
-    public ProductResponseDto readOne(Long id) {
+    @Transactional
+    public ProductResponseDto readOne(Long id, Long userId) {
 
         Product product = productRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
 
-        
+        if (userId != null) {
+            viewHistoryService.record(userId, product.getId(), product.getProductCategory());
+        }
+
         return ProductResponseDto.from(product);
     }
 
@@ -82,6 +91,9 @@ public class ProductService {
 
         product.validateSeller(userId);
 
+        int oldPrice = product.getPrice();
+        int newPrice = requestDto.getPrice();
+
         product.update(requestDto.getTitle(),
                 requestDto.getContents(),
                 requestDto.getPrice(),
@@ -89,7 +101,23 @@ public class ProductService {
                 requestDto.getProductStatus(),
                 requestDto.getProductCategory());
 
+        // 가격이 낮아졌으면 (할인) 조회했던 사용자에게 알림
+        if (newPrice < oldPrice) {
+            sendDiscountNotification(product, oldPrice, newPrice);
+        }
+
         return ProductResponseDto.from(product);
+    }
+
+    private void sendDiscountNotification(Product product, int oldPrice, int newPrice) {
+        var userIds = viewHistoryService.findUsersByProductId(product.getId());
+        int discountPercent = (int) ((1 - (double) newPrice / oldPrice) * 100);
+        String message = String.format("'%s' 상품이 %d%% 할인 중! (%,d원 → %,d원)",
+                product.getTitle(), discountPercent, oldPrice, newPrice);
+
+        for (Long viewedUserId : userIds) {
+            notificationService.send(viewedUserId, NotificationType.PRODUCT_DISCOUNT, message, product.getId());
+        }
     }
 
     @Transactional
