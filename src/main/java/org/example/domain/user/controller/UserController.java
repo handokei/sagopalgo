@@ -47,6 +47,27 @@ public class UserController {
         return ResponseEntity.ok().body(userReadResponseDto);
     }
 
+    //내 정보 조회
+    @GetMapping("/me")
+    public ResponseEntity<UserReadResponseDto> getMe(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long id = userDetails.getId();
+        UserReadResponseDto userReadResponseDto = userService.read(id);
+        return ResponseEntity.ok().body(userReadResponseDto);
+    }
+
+    //내 정보 수정
+    @PatchMapping("/me")
+    public ResponseEntity<UserReadResponseDto> updateMe(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody @Valid UserModifiedRequestDto requestDto
+    ) {
+        Long userId = userDetails.getId();
+        UserReadResponseDto userReadResponseDto = userService.updateUser(userId, requestDto);
+        return ResponseEntity.ok().body(userReadResponseDto);
+    }
+
     //회원수정
     @PatchMapping("/{id}")
     public ResponseEntity<UserReadResponseDto> modifiedUser(

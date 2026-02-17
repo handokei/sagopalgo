@@ -17,7 +17,8 @@ public enum ProductErrorCode implements ErrorCode {
     SELLER_REQUIRED(HttpStatus.BAD_REQUEST, "판매자 정보는 필수입니다."),
     NOT_SELLER_OF_PRODUCT(HttpStatus.FORBIDDEN, "해당 상품의 판매자가 아닙니다."),
     INSUFFICIENT_STOCK(HttpStatus.BAD_REQUEST, "재고가 부족합니다."),
-    PRODUCT_NOT_ON_SALE(HttpStatus.BAD_REQUEST, "판매 중인 상품이 아닙니다.");
+    PRODUCT_NOT_ON_SALE(HttpStatus.BAD_REQUEST, "판매 중인 상품이 아닙니다."),
+    IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "이미지를 찾을 수 없습니다.");
 
     private final HttpStatus status;
 

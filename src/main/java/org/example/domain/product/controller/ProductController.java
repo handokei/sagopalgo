@@ -47,6 +47,18 @@ public class ProductController {
        return ResponseEntity.ok().body(responseDto);
     }
 
+    //내 상품 조회
+    @GetMapping("/me")
+    public ResponseEntity<Page<ProductResponseDto>> getMyProducts(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Long userId = userDetails.getId();
+        Page<ProductResponseDto> responseDto = productService.getMyProducts(userId, page, size);
+        return ResponseEntity.ok().body(responseDto);
+    }
+
     //단건 조회
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponseDto> readOneProduct(
