@@ -66,7 +66,11 @@ public class CartService {
     public Page<CartResponseDto> getCartItems(OwnerType ownerType, String ownerKey, int page, int size) {
 
         Cart cart = cartRepository.findByOwnerTypeAndOwnerKey(ownerType, ownerKey)
-                .orElseThrow(() -> new CartException(CartErrorCode.CART_NOT_FOUND_EXCEPTION));
+                .orElse(null);
+
+        if (cart == null) {
+            return new PageImpl<>(List.of(), PageRequest.of(page, size), 0);
+        }
 
         List<CartResponseDto> allItems = cart.getCartItems().stream()
                 .map(cartItem -> {
