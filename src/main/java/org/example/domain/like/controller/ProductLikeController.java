@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
 @RestController
@@ -27,6 +29,15 @@ public class ProductLikeController {
         ProductLikesCreateResponseDto responseDto = productLikeService.createLike(id, userDetails.getId());
         return ResponseEntity.ok().body(responseDto);
 
+    }
+
+    @GetMapping("/{id}/likes/check")
+    public ResponseEntity<Map<String, Boolean>> checkLike(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        boolean liked = productLikeService.isLiked(id, userDetails.getId());
+        return ResponseEntity.ok(Map.of("liked", liked));
     }
 
     @GetMapping("/me/likes")

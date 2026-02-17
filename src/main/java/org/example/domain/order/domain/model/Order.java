@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.domain.delivery.domain.model.Delivery;
 import org.example.domain.order.exception.OrderErrorCode;
 import org.example.domain.order.exception.OrderException;
 import org.example.global.config.entity.BaseEntity;
@@ -36,15 +37,20 @@ public class Order extends BaseEntity {
 
     private String summaryTitle;
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "delivery_id")
+    private Delivery delivery;
+
     private  boolean isDeleted = false;
 
-    private Order(Long userId, List<OrderItem> orderItems) {
+    private Order(Long userId, List<OrderItem> orderItems, Delivery delivery) {
         this.orderNumber = UUID.randomUUID();
         this.userId = userId;
         this.orderStatus = OrderStatus.CREATED;
         this.orderItems = orderItems;
         this.totalPrice = calculateTotalPrice();
         this.summaryTitle = generateSummaryTitle();
+        this.delivery = delivery;
 
         orderItems.forEach(item -> item.assignOrder(this));
     }
@@ -74,8 +80,8 @@ public class Order extends BaseEntity {
     }
 
 
-    public static Order of(Long userId,List<OrderItem> orderItems){
-             return new Order(userId, orderItems);
+    public static Order of(Long userId, List<OrderItem> orderItems, Delivery delivery){
+             return new Order(userId, orderItems, delivery);
     }
 
     public void cancel() {

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.domain.user.domain.model.User;
 import org.example.global.config.entity.BaseEntity;
 
 import static org.example.domain.product.domain.model.ProductStatus.OUT_OF_STOCK;
@@ -19,6 +20,13 @@ public class Product extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "seller_id", nullable = false)
+    private Long sellerId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id", insertable = false, updatable = false)
+    private User seller;
 
     private String title;
 
@@ -36,37 +44,47 @@ public class Product extends BaseEntity {
 
     private boolean isDeleted = false;
 
-    private Product(String title, String contents, int price, int stock, ProductStatus productStatus, ProductCategory productCategory) {
+    private Product(User seller, String title, String contents, int price, int stock, ProductStatus productStatus, ProductCategory productCategory) {
+        if (seller == null) {
+            throw new ProductException(ProductErrorCode.SELLER_REQUIRED);
+        }
+        this.sellerId = seller.getId();
+        this.seller = seller;
         this.title = title;
         this.contents = contents;
-        this.price = price;
-        if (price <= 0 ) {
+        if (price <= 0) {
             throw new ProductException(ProductErrorCode.VALID_NON_ZERO_PRICE);
         }
-        if (stock < 0 ) {
+        this.price = price;
+        if (stock < 0) {
             throw new ProductException(ProductErrorCode.VALID_NON_ZERO_STOCK);
         }
         this.stock = stock;
-        if (productStatus == OUT_OF_STOCK && stock != 0 ) {
+        if (productStatus == OUT_OF_STOCK && stock != 0) {
             throw new ProductException(ProductErrorCode.INVALID_OUT_OF_STOCK_STATUS_CHANGE);
         }
-        if (productStatus == ON_SALE && stock <= 0 ) {
+        if (productStatus == ON_SALE && stock <= 0) {
             throw new ProductException(ProductErrorCode.INVALID_OUT_OF_STOCK_STATUS_CHANGE);
         }
         this.productStatus = productStatus;
-        if (productCategory == null ) {
+        if (productCategory == null) {
             throw new ProductException(ProductErrorCode.VALID_NON_NULL_PRODUCT_CATEGORY);
         }
         this.productCategory = productCategory;
     }
 
-    public static Product of(String title, String contents, int price, int stock, ProductStatus productStatus, ProductCategory productCategory) {
+    public static Product of(User seller, String title, String contents, int price, int stock, ProductStatus productStatus, ProductCategory productCategory) {
+        return new Product(seller, title, contents, price, stock, productStatus, productCategory);
+    }
 
-         return new Product(title,
-                 contents,
-                 price,
-                 stock, productStatus,
-                 productCategory);
+    public void validateSeller(Long userId) {
+        if (!this.sellerId.equals(userId)) {
+            throw new ProductException(ProductErrorCode.NOT_SELLER_OF_PRODUCT);
+        }
+    }
+
+    public boolean isSeller(Long userId) {
+        return this.sellerId.equals(userId);
     }
 
     public void update(String title,
@@ -110,5 +128,25 @@ public class Product extends BaseEntity {
 
     public void delete() {
          this.isDeleted = true;
+    }
+
+    public void decreaseStock(int quantity) {
+        if (this.productStatus != ON_SALE) {
+            throw new ProductException(ProductErrorCode.PRODUCT_NOT_ON_SALE);
+        }
+        if (this.stock < quantity) {
+            throw new ProductException(ProductErrorCode.INSUFFICIENT_STOCK);
+        }
+        this.stock -= quantity;
+        if (this.stock == 0) {
+            this.productStatus = OUT_OF_STOCK;
+        }
+    }
+
+    public void restoreStock(int quantity) {
+        this.stock += quantity;
+        if (this.productStatus == OUT_OF_STOCK && this.stock > 0) {
+            this.productStatus = ON_SALE;
+        }
     }
 }

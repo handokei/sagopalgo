@@ -50,9 +50,16 @@ public class ProductLikeService {
 
         PageRequest pageRequest = PageRequest.of(page, size);
 
-
         return productLikeRepository
                 .findAllByUserId(userId, pageRequest)
-                .map(ProductLikeResponseDto::from);
+                .map(like -> {
+                    var product = productRepository.findByIdAndIsDeletedFalse(like.getProductId())
+                            .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
+                    return ProductLikeResponseDto.from(like.getId(), product);
+                });
+    }
+
+    public boolean isLiked(Long productId, Long userId) {
+        return productLikeRepository.findByProductIdAndUserId(productId, userId).isPresent();
     }
 }
