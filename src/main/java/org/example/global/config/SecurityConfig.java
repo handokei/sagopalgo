@@ -49,7 +49,8 @@ public class SecurityConfig {
                                 "/api/users/login",
                                 "/api/carts/guest/**",
                                 "/api/bills/**",
-                                "/ws/**"
+                                "/ws/**",
+                                "/actuator/**"
                         ).permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/products/**")
