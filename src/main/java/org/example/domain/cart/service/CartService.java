@@ -79,12 +79,9 @@ public class CartService {
 
         List<CartResponseDto> allItems = cart.getCartItems().stream()
                 .map(cartItem -> {
-                    String productTitle = productRepository.findTitleByIdAndIsDeletedFalse(cartItem.getProductId())
-                            .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
-
                     return productRepository
-                            .findTitleByIdAndIsDeletedFalse(cartItem.getProductId())
-                            .map(title -> CartResponseDto.from(cartItem, title))
+                            .findByIdAndIsDeletedFalse(cartItem.getProductId())
+                            .map(product -> CartResponseDto.from(cartItem, product.getTitle(), product.getPrice()))
                             .orElse(null);
                 })
                 .filter(Objects::nonNull)
