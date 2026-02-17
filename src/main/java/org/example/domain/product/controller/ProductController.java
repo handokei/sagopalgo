@@ -23,7 +23,7 @@ public class ProductController {
     private final ProductService productService;
 
     //제품 생성
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<ProductCreateResponseDto> create(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid ProductCreateRequestDto requestDto
