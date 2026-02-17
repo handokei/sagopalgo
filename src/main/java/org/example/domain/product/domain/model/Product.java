@@ -14,7 +14,7 @@ import org.example.domain.product.exception.ProductException;
 
 @Entity
 @Table(name = "products")
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Product extends BaseEntity {
 

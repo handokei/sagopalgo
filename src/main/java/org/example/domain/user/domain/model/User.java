@@ -9,7 +9,7 @@ import org.example.global.config.entity.BaseEntity;
 @Entity
 @Getter
 @Table(name = "users")
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -12,7 +12,7 @@ import org.example.global.config.entity.BaseEntity;
 uniqueConstraints = {
         @UniqueConstraint(columnNames = {"user_id", "product_id"})
 })
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductLike extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -12,7 +12,7 @@ import org.example.domain.cart.exception.CartItemException;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CartItem {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

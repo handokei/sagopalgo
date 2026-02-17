@@ -8,7 +8,7 @@ import org.example.global.config.entity.BaseEntity;
 
 @Entity
 @Table(name = "notifications")
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Notification extends BaseEntity {
 
