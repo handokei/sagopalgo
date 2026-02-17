@@ -2,6 +2,8 @@ package org.example.domain.order.controller.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.example.domain.delivery.domain.model.Delivery;
+import org.example.domain.delivery.domain.model.DeliveryStatus;
 import org.example.domain.order.domain.model.Order;
 import org.example.domain.order.domain.model.OrderStatus;
 
@@ -25,18 +27,22 @@ public class OrderResponseDto {
 
     private String address;
 
+    private DeliveryStatus deliveryStatus;
+
     private LocalDateTime createAt;
 
 
     public static OrderResponseDto from(Order order) {
+        Delivery delivery = order.getDelivery();
         return new OrderResponseDto(
                 order.getId(),
                 order.getSummaryTitle(),
                 order.getTotalPrice(),
                 order.getOrderStatus(),
-                order.getRecipientName(),
-                order.getPhoneNumber(),
-                order.getAddress(),
+                delivery != null ? delivery.getRecipientName() : null,
+                delivery != null ? delivery.getPhoneNumber() : null,
+                delivery != null ? delivery.getAddress() : null,
+                delivery != null ? delivery.getStatus() : null,
                 order.getCreatedAt()
         );
     }
