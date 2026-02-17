@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.domain.cart.domain.model.OwnerType;
 import org.example.domain.cart.service.CartService;
+import org.example.domain.delivery.domain.model.Delivery;
 import org.example.domain.notification.domain.model.NotificationType;
 import org.example.domain.notification.service.NotificationService;
 import org.example.domain.order.controller.dto.OrderCreateRequestDto;
@@ -62,13 +63,13 @@ public class OrderService {
                 })
                 .toList();
 
-        Order order = Order.of(
-                userId,
-                orderItems,
+        Delivery delivery = Delivery.of(
                 requestDto.getName(),
                 requestDto.getPhoneNumber(),
                 requestDto.getAddress()
         );
+
+        Order order = Order.of(userId, orderItems, delivery);
         orderRepository.save(order);
 
         // 장바구니 비우기
@@ -112,6 +113,7 @@ public class OrderService {
                 .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND_EXCEPTION));
 
         order.pay();
+        order.getDelivery().prepare();
 
         notificationService.send(userId, NotificationType.ORDER_PAID,
                 "결제가 완료되었습니다: " + order.getSummaryTitle(), order.getId());
@@ -128,6 +130,7 @@ public class OrderService {
                 .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND_EXCEPTION));
 
         order.cancel();
+        order.getDelivery().cancel();
 
         for (OrderItem orderItem : order.getOrderItems()) {
             Product product = productRepository.findByIdWithLock(orderItem.getProductId())
@@ -150,6 +153,7 @@ public class OrderService {
                 .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND_EXCEPTION));
 
         order.shipped();
+        order.getDelivery().ship();
 
         notificationService.send(userId, NotificationType.ORDER_SHIPPED,
                 "배송이 시작되었습니다: " + order.getSummaryTitle(), order.getId());
@@ -166,6 +170,7 @@ public class OrderService {
                 .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND_EXCEPTION));
 
         order.completed();
+        order.getDelivery().complete();
 
         notificationService.send(userId, NotificationType.ORDER_COMPLETED,
                 "배송이 완료되었습니다: " + order.getSummaryTitle(), order.getId());
