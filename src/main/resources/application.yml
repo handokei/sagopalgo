@@ -3,14 +3,14 @@ spring:
     name: sagopalgo
 
   datasource:
-    url: jdbc:mysql://localhost:3306/sagopalgo
-    username: *
-    password: *
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: ${DDL_AUTO:create}
     properties:
       hibernate:
         format_sql: true
@@ -19,7 +19,7 @@ spring:
 
 jwt:
   secret:
-    key: *
+    key: ${JWT_SECRET_KEY}
   access-token:
     expiration:
       access-token: 1800000 # 30 minutes
