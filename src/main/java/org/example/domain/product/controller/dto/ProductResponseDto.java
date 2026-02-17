@@ -22,8 +22,6 @@ public class ProductResponseDto {
 
     private int price;
 
-    private int stock;
-
     private ProductStatus productStatus;
 
     private ProductCategory productCategory;
@@ -37,7 +35,6 @@ public class ProductResponseDto {
         this.title = product.getTitle();
         this.contents = product.getContents();
         this.price = product.getPrice();
-        this.stock = product.getStock();
         this.productStatus = product.getProductStatus();
         this.productCategory = product.getProductCategory();
         this.createdAt = product.getCreatedAt();
