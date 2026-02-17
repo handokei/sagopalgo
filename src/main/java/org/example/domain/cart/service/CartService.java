@@ -51,6 +51,11 @@ public class CartService {
             throw new CartException(CartErrorCode.NOT_SALE_PRODUCT_INVALID_ADD_CART_EXCEPTION);
         }
 
+        // 본인 상품은 장바구니에 담을 수 없음
+        if (ownerType == OwnerType.USER && product.isSeller(Long.parseLong(ownerKey))) {
+            throw new CartException(CartErrorCode.OWN_PRODUCT_CART_EXCEPTION);
+        }
+
         Cart cart = cartRepository.findByOwnerTypeAndOwnerKey(ownerType, ownerKey)
                 .orElseGet(() -> cartRepository.save(
                         Cart.create(ownerType,ownerKey)
