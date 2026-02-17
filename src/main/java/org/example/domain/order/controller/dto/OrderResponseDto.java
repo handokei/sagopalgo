@@ -19,14 +19,25 @@ public class OrderResponseDto {
 
     private OrderStatus orderStatus;
 
+    private String recipientName;
+
+    private String phoneNumber;
+
+    private String address;
+
     private LocalDateTime createAt;
 
 
     public static OrderResponseDto from(Order order) {
-        return new OrderResponseDto(order.getId(),
+        return new OrderResponseDto(
+                order.getId(),
                 order.getSummaryTitle(),
-                        order.getTotalPrice(),
-                        order.getOrderStatus(),
-                        order.getCreatedAt());
+                order.getTotalPrice(),
+                order.getOrderStatus(),
+                order.getRecipientName(),
+                order.getPhoneNumber(),
+                order.getAddress(),
+                order.getCreatedAt()
+        );
     }
 }
