@@ -10,7 +10,7 @@ import org.example.global.config.entity.BaseEntity;
 @Entity
 @Table(name = "order_items")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderItem extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
