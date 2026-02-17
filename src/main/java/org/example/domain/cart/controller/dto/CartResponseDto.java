@@ -14,13 +14,16 @@ public class CartResponseDto {
 
     private String productTitle;
 
+    private int productPrice;
+
     private int quantity;
 
-    public static CartResponseDto from(CartItem cartItem, String productTitle) {
+    public static CartResponseDto from(CartItem cartItem, String productTitle, int productPrice) {
         return new CartResponseDto (
                 cartItem.getId(),
                 cartItem.getProductId(),
                 productTitle,
+                productPrice,
                 cartItem.getQuantity()
     );
     }
