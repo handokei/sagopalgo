@@ -2,6 +2,8 @@ package org.example.domain.order.service;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.domain.cart.domain.model.OwnerType;
+import org.example.domain.cart.service.CartService;
 import org.example.domain.notification.domain.model.NotificationType;
 import org.example.domain.notification.service.NotificationService;
 import org.example.domain.order.controller.dto.OrderCreateRequestDto;
@@ -37,24 +39,40 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final CartService cartService;
 
     @Transactional
     public OrderCreateResponseDto createOrder(Long userId, @Valid OrderCreateRequestDto requestDto) {
         userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
 
-        Product product = productRepository.findByIdWithLock(requestDto.getProductId())
-                .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
+        List<OrderItem> orderItems = requestDto.getItems().stream()
+                .map(itemDto -> {
+                    Product product = productRepository.findByIdWithLock(itemDto.getProductId())
+                            .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
 
-        product.decreaseStock(requestDto.getQuantity());
+                    product.decreaseStock(itemDto.getQuantity());
 
-        OrderItem orderItem = OrderItem.of(requestDto.getProductId(),
-                product.getTitle(),
-                product.getPrice(),
-                requestDto.getQuantity());
+                    return OrderItem.of(
+                            itemDto.getProductId(),
+                            product.getTitle(),
+                            product.getPrice(),
+                            itemDto.getQuantity()
+                    );
+                })
+                .toList();
 
-        Order order = Order.of(userId, List.of(orderItem));
+        Order order = Order.of(
+                userId,
+                orderItems,
+                requestDto.getName(),
+                requestDto.getPhoneNumber(),
+                requestDto.getAddress()
+        );
         orderRepository.save(order);
+
+        // 장바구니 비우기
+        cartService.clearCart(OwnerType.USER, userId.toString());
 
         notificationService.send(userId, NotificationType.ORDER_CREATED,
                 "주문이 생성되었습니다: " + order.getSummaryTitle(), order.getId());

@@ -134,4 +134,14 @@ public class CartService {
 
         cartItem.changeQuantity(quantity);
     }
+
+    @Transactional
+    public void clearCart(OwnerType ownerType, String ownerKey) {
+        Cart cart = cartRepository.findByOwnerTypeAndOwnerKey(ownerType, ownerKey)
+                .orElse(null);
+
+        if (cart != null) {
+            cart.getCartItems().clear();
+        }
+    }
 }

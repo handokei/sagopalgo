@@ -36,15 +36,24 @@ public class Order extends BaseEntity {
 
     private String summaryTitle;
 
+    private String recipientName;
+
+    private String phoneNumber;
+
+    private String address;
+
     private  boolean isDeleted = false;
 
-    private Order(Long userId, List<OrderItem> orderItems) {
+    private Order(Long userId, List<OrderItem> orderItems, String recipientName, String phoneNumber, String address) {
         this.orderNumber = UUID.randomUUID();
         this.userId = userId;
         this.orderStatus = OrderStatus.CREATED;
         this.orderItems = orderItems;
         this.totalPrice = calculateTotalPrice();
         this.summaryTitle = generateSummaryTitle();
+        this.recipientName = recipientName;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
 
         orderItems.forEach(item -> item.assignOrder(this));
     }
@@ -74,8 +83,8 @@ public class Order extends BaseEntity {
     }
 
 
-    public static Order of(Long userId,List<OrderItem> orderItems){
-             return new Order(userId, orderItems);
+    public static Order of(Long userId, List<OrderItem> orderItems, String recipientName, String phoneNumber, String address){
+             return new Order(userId, orderItems, recipientName, phoneNumber, address);
     }
 
     public void cancel() {
