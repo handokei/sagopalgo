@@ -1,5 +1,6 @@
 import http from 'k6/http';
-import { check, Counter } from 'k6';
+import { check } from 'k6';
+import { Counter } from 'k6/metrics';
 
 /**
  * 재고 동시성 테스트
@@ -24,11 +25,11 @@ export const options = {
 };
 
 const BASE_URL = 'http://localhost:8080';
-const TEST_PRODUCT_ID = 1; // 재고 10개인 상품 ID로 변경
+const TEST_PRODUCT_ID = 6; // IN_STOCK 상품
 
 const TEST_USER = {
-  email: 'test@test.com',
-  password: 'test1234',
+  email: 'test3@test.com',
+  password: 'Test1234@',
 };
 
 export function setup() {
