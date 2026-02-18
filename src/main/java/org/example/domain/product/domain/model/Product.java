@@ -149,4 +149,14 @@ public class Product extends BaseEntity {
             this.productStatus = ON_SALE;
         }
     }
+
+    public StockStatus getStockStatus() {
+        if (this.stock == 0) {
+            return StockStatus.OUT_OF_STOCK;
+        } else if (this.stock < 5) {
+            return StockStatus.LOW_STOCK;
+        } else {
+            return StockStatus.IN_STOCK;
+        }
+    }
 }

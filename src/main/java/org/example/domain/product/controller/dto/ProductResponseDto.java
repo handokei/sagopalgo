@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.example.domain.product.domain.model.Product;
 import org.example.domain.product.domain.model.ProductCategory;
 import org.example.domain.product.domain.model.ProductStatus;
+import org.example.domain.product.domain.model.StockStatus;
 
 import java.time.LocalDateTime;
 
@@ -26,6 +27,8 @@ public class ProductResponseDto {
 
     private ProductCategory productCategory;
 
+    private StockStatus stockStatus;
+
     private LocalDateTime createdAt;
 
     public ProductResponseDto(Product product) {
@@ -37,6 +40,7 @@ public class ProductResponseDto {
         this.price = product.getPrice();
         this.productStatus = product.getProductStatus();
         this.productCategory = product.getProductCategory();
+        this.stockStatus = product.getStockStatus();
         this.createdAt = product.getCreatedAt();
     }
 
