@@ -1,0 +1,52 @@
+{
+  "environments": {
+    "local": {
+      "baseUrl": "http://localhost:8080",
+      "thresholds": {
+        "p95": 5000,
+        "errorRate": 0.5
+      }
+    },
+    "dev": {
+      "baseUrl": "http://dev-api.example.com",
+      "thresholds": {
+        "p95": 3000,
+        "errorRate": 0.1
+      }
+    },
+    "prod": {
+      "baseUrl": "https://api.example.com",
+      "thresholds": {
+        "p95": 1000,
+        "errorRate": 0.01
+      }
+    }
+  },
+  "scenarios": {
+    "smoke": {
+      "vus": 5,
+      "duration": "30s"
+    },
+    "load": {
+      "vus": 100,
+      "duration": "5m"
+    },
+    "stress": {
+      "maxVus": 500,
+      "duration": "10m"
+    },
+    "heavy": {
+      "maxVus": 1000,
+      "duration": "4m"
+    }
+  },
+  "testData": {
+    "pageSize": 20,
+    "maxPage": 5,
+    "orderProbability": 0.1,
+    "thinkTime": {
+      "min": 0.5,
+      "max": 2.0
+    }
+  }
+}
