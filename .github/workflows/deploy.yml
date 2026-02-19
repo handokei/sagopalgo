@@ -57,10 +57,10 @@ jobs:
             docker run -d \
               --name sagopalgo \
               -p 8080:8080 \
-              -e DB_URL=${{ secrets.DB_URL }} \
-              -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
-              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              -e JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} \
-              -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
+              -e "DB_URL=${{ secrets.DB_URL }}" \
+              -e "DB_USERNAME=${{ secrets.DB_USERNAME }}" \
+              -e "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" \
+              -e "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" \
+              -e "REDIS_HOST=${{ secrets.REDIS_HOST }}" \
               ${{ env.DOCKER_IMAGE }}:latest
             docker image prune -f
