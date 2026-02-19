@@ -1,0 +1,12 @@
+.git
+.gitignore
+.idea
+*.md
+build
+.gradle
+k6
+monitoring
+docker-compose*.yml
+Dockerfile
+.env
+*.log
