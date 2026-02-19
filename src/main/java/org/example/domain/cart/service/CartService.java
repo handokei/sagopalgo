@@ -15,6 +15,7 @@ import org.example.domain.cart.exception.CartItemErrorCode;
 import org.example.domain.cart.exception.CartItemException;
 import org.example.domain.product.domain.model.Product;
 import org.example.domain.product.domain.model.ProductStatus;
+import org.example.domain.product.domain.repository.ProductImageRepository;
 import org.example.domain.product.domain.repository.ProductRepository;
 import org.example.domain.product.exception.ProductErrorCode;
 import org.example.domain.product.exception.ProductException;
@@ -36,6 +37,7 @@ public class CartService {
 
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final ProductImageRepository productImageRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
 
@@ -81,7 +83,13 @@ public class CartService {
                 .map(cartItem -> {
                     return productRepository
                             .findByIdAndIsDeletedFalse(cartItem.getProductId())
-                            .map(product -> CartResponseDto.from(cartItem, product.getTitle(), product.getPrice()))
+                            .map(product -> {
+                                String imageUrl = productImageRepository
+                                        .findByProductIdAndIsMainTrueAndIsDeletedFalse(product.getId())
+                                        .map(img -> img.getImageUrl())
+                                        .orElse(null);
+                                return CartResponseDto.from(cartItem, product.getTitle(), product.getPrice(), imageUrl);
+                            })
                             .orElse(null);
                 })
                 .filter(Objects::nonNull)

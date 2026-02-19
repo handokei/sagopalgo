@@ -16,15 +16,18 @@ public class CartResponseDto {
 
     private int productPrice;
 
+    private String productImageUrl;
+
     private int quantity;
 
-    public static CartResponseDto from(CartItem cartItem, String productTitle, int productPrice) {
-        return new CartResponseDto (
+    public static CartResponseDto from(CartItem cartItem, String productTitle, int productPrice, String productImageUrl) {
+        return new CartResponseDto(
                 cartItem.getId(),
                 cartItem.getProductId(),
                 productTitle,
                 productPrice,
+                productImageUrl,
                 cartItem.getQuantity()
-    );
+        );
     }
 }
