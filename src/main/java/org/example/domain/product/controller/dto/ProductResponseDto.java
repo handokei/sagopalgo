@@ -1,15 +1,21 @@
 package org.example.domain.product.controller.dto;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.example.domain.product.domain.model.Product;
 import org.example.domain.product.domain.model.ProductCategory;
 import org.example.domain.product.domain.model.ProductStatus;
 import org.example.domain.product.domain.model.StockStatus;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Getter
-public class ProductResponseDto {
+@NoArgsConstructor
+@lombok.AllArgsConstructor
+public class ProductResponseDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Long id;
 

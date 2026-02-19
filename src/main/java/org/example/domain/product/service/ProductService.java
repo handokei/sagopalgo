@@ -35,6 +35,7 @@ public class ProductService {
     private final ViewHistoryService viewHistoryService;
     private final NotificationService notificationService;
     private final ProductLikeRepository productLikeRepository;
+    private final ProductCacheService productCacheService;
 
 
     @Transactional
@@ -57,21 +58,41 @@ public class ProductService {
 
         productRepository.save(product);
 
+        // 캐시 무효화
+        productCacheService.evictAllProductList();
+
         return ProductCreateResponseDto.from(product);
     }
 
 
     public Page<ProductResponseDto> getProducts(int page, int size, String sort, ProductCategory productCategory, String keyword) {
+        // 캐시 키 생성
+        String cacheKey = productCacheService.generateListCacheKey(
+                page, size, sort,
+                productCategory != null ? productCategory.name() : null,
+                keyword
+        );
 
         Pageable pageable = PageRequest.of(page, size);
 
+        // 캐시 조회
+        var cached = productCacheService.getProductList(cacheKey);
+        if (cached != null) {
+            return new org.springframework.data.domain.PageImpl<>(cached, pageable, cached.size());
+        }
 
-        return productRepository.search(
+        // DB 조회
+        Page<ProductResponseDto> result = productRepository.search(
                 pageable,
                 sort,
                 productCategory,
                 keyword
         ).map(ProductResponseDto::from);
+
+        // 캐시 저장
+        productCacheService.setProductList(cacheKey, result.getContent());
+
+        return result;
     }
 
     public Page<ProductResponseDto> getMyProducts(Long userId, int page, int size) {
@@ -118,6 +139,10 @@ public class ProductService {
             sendDiscountNotification(product, oldPrice, newPrice);
         }
 
+        // 캐시 무효화
+        productCacheService.evictProduct(productId);
+        productCacheService.evictAllProductList();
+
         return ProductResponseDto.from(product);
     }
 
@@ -148,6 +173,10 @@ public class ProductService {
         product.validateSeller(userId);
 
         product.delete();
+
+        // 캐시 무효화
+        productCacheService.evictProduct(productId);
+        productCacheService.evictAllProductList();
     }
 
     @Transactional
@@ -161,6 +190,10 @@ public class ProductService {
         product.validateSeller(userId);
 
         product.updateProductStatus(requestDto.getProductStatus());
+
+        // 캐시 무효화
+        productCacheService.evictProduct(productId);
+        productCacheService.evictAllProductList();
 
         return ProductResponseDto.from(product);
     }
