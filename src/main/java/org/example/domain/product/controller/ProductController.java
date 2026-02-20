@@ -3,6 +3,7 @@ package org.example.domain.product.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.domain.product.controller.dto.*;
+import org.example.domain.product.domain.model.ProductStatus;
 import org.example.domain.product.service.ProductService;
 
 import org.example.global.security.jwt.CustomUserDetails;
@@ -36,9 +37,13 @@ public class ProductController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String sort,
             @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) String keyword
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer minPrice,
+            @RequestParam(required = false) Integer maxPrice,
+            @RequestParam(required = false) ProductStatus status
     ) {
-        Page<ProductResponseDto> responseDto = productService.getProducts(page, size, sort, categoryId, keyword);
+        Page<ProductResponseDto> responseDto = productService.getProducts(page, size, sort, categoryId, keyword,
+                minPrice, maxPrice, status);
         return ResponseEntity.ok().body(responseDto);
     }
 
