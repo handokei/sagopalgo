@@ -15,6 +15,7 @@ import org.example.domain.product.exception.ProductException;
 import org.example.domain.user.domain.repository.UserRepository;
 import org.example.domain.user.exception.UserErrorCode;
 import org.example.domain.user.exception.UserException;
+import org.example.domain.product.domain.model.ProductStatus;
 import org.example.domain.notification.domain.model.NotificationType;
 import org.example.domain.notification.service.NotificationService;
 import org.example.domain.viewhistory.service.ViewHistoryService;
@@ -68,7 +69,8 @@ public class ProductService {
     }
 
 
-    public Page<ProductResponseDto> getProducts(int page, int size, String sort, Long categoryId, String keyword) {
+    public Page<ProductResponseDto> getProducts(int page, int size, String sort, Long categoryId, String keyword,
+                                                 Integer minPrice, Integer maxPrice, ProductStatus status) {
 
         Pageable pageable = PageRequest.of(page, size);
 
@@ -76,7 +78,10 @@ public class ProductService {
                 pageable,
                 sort,
                 categoryId,
-                keyword
+                keyword,
+                minPrice,
+                maxPrice,
+                status
         ).map(ProductResponseDto::from);
     }
 

@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.domain.like.domain.model.QProductLike;
 import org.example.domain.order.domain.model.QOrderItem;
 import org.example.domain.product.domain.model.Product;
+import org.example.domain.product.domain.model.ProductStatus;
 import org.example.domain.product.domain.model.QProduct;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,7 +23,8 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<Product> search(Pageable pageable, String sort, Long categoryId, String keyword) {
+    public Page<Product> search(Pageable pageable, String sort, Long categoryId, String keyword,
+                                Integer minPrice, Integer maxPrice, ProductStatus status) {
         QProduct product = QProduct.product;
         QProductLike productLike = QProductLike.productLike;
         QOrderItem orderItem = QOrderItem.orderItem;
@@ -35,7 +37,10 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
                 .leftJoin(orderItem).on(orderItem.productId.eq(product.id))
                 .where(product.isDeleted.eq(false),
                         categoryIdEquals(categoryId, product),
-                        titleContains(keyword, product))
+                        titleContains(keyword, product),
+                        priceGoe(minPrice, product),
+                        priceLoe(maxPrice, product),
+                        statusEquals(status, product))
                 .groupBy(product.id, product.seller.id)
                 .orderBy(
                         getOrderSpecifier(sort,
@@ -52,7 +57,10 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
                 .from(product)
                 .where(product.isDeleted.eq(false),
                         categoryIdEquals(categoryId, product),
-                        titleContains(keyword, product))
+                        titleContains(keyword, product),
+                        priceGoe(minPrice, product),
+                        priceLoe(maxPrice, product),
+                        statusEquals(status, product))
                 .fetchOne();
 
         return new PageImpl<>(result, pageable, total);
@@ -83,5 +91,23 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
         return categoryId == null
                 ? null
                 : product.categoryId.eq(categoryId);
+    }
+
+    private BooleanExpression priceGoe(Integer minPrice, QProduct product) {
+        return minPrice == null
+                ? null
+                : product.price.goe(minPrice);
+    }
+
+    private BooleanExpression priceLoe(Integer maxPrice, QProduct product) {
+        return maxPrice == null
+                ? null
+                : product.price.loe(maxPrice);
+    }
+
+    private BooleanExpression statusEquals(ProductStatus status, QProduct product) {
+        return status == null
+                ? null
+                : product.productStatus.eq(status);
     }
 }
