@@ -1,7 +1,6 @@
 package org.example.domain.viewhistory.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.domain.product.domain.model.ProductCategory;
 import org.example.domain.viewhistory.domain.model.ViewHistory;
 import org.example.domain.viewhistory.domain.repository.ViewHistoryRepository;
 import org.springframework.stereotype.Service;
@@ -17,9 +16,9 @@ public class ViewHistoryService {
     private final ViewHistoryRepository viewHistoryRepository;
 
     @Transactional
-    public void record(Long userId, Long productId, ProductCategory productCategory) {
+    public void record(Long userId, Long productId, Long categoryId) {
         if (!viewHistoryRepository.existsByUserIdAndProductId(userId, productId)) {
-            ViewHistory viewHistory = ViewHistory.of(userId, productId, productCategory);
+            ViewHistory viewHistory = ViewHistory.of(userId, productId, categoryId);
             viewHistoryRepository.save(viewHistory);
         }
     }
@@ -28,7 +27,7 @@ public class ViewHistoryService {
         return viewHistoryRepository.findUserIdsByProductId(productId);
     }
 
-    public List<Long> findUsersByCategory(ProductCategory category) {
-        return viewHistoryRepository.findUserIdsByProductCategory(category);
+    public List<Long> findUsersByCategoryId(Long categoryId) {
+        return viewHistoryRepository.findUserIdsByCategoryId(categoryId);
     }
 }

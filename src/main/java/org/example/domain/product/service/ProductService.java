@@ -2,10 +2,13 @@ package org.example.domain.product.service;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.domain.category.domain.model.Category;
+import org.example.domain.category.domain.repository.CategoryRepository;
+import org.example.domain.category.exception.CategoryErrorCode;
+import org.example.domain.category.exception.CategoryException;
 import org.example.domain.like.domain.repository.ProductLikeRepository;
 import org.example.domain.product.controller.dto.*;
 import org.example.domain.product.domain.model.Product;
-import org.example.domain.product.domain.model.ProductCategory;
 import org.example.domain.product.domain.repository.ProductRepository;
 import org.example.domain.product.exception.ProductErrorCode;
 import org.example.domain.product.exception.ProductException;
@@ -32,6 +35,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
     private final ViewHistoryService viewHistoryService;
     private final NotificationService notificationService;
     private final ProductLikeRepository productLikeRepository;
@@ -46,6 +50,9 @@ public class ProductService {
             throw new ProductException(ProductErrorCode.DUPLICATE_PRODUCT_TITLE);
         }
 
+        Category category = categoryRepository.findByIdAndIsDeletedFalse(requestDto.getCategoryId())
+                .orElseThrow(() -> new CategoryException(CategoryErrorCode.CATEGORY_NOT_FOUND));
+
         Product product = Product.of(
                 seller,
                 requestDto.getTitle(),
@@ -53,7 +60,7 @@ public class ProductService {
                 requestDto.getPrice(),
                 requestDto.getStock(),
                 requestDto.getProductStatus(),
-                requestDto.getProductCategory());
+                category);
 
         productRepository.save(product);
 
@@ -61,15 +68,14 @@ public class ProductService {
     }
 
 
-    public Page<ProductResponseDto> getProducts(int page, int size, String sort, ProductCategory productCategory, String keyword) {
+    public Page<ProductResponseDto> getProducts(int page, int size, String sort, Long categoryId, String keyword) {
 
         Pageable pageable = PageRequest.of(page, size);
-
 
         return productRepository.search(
                 pageable,
                 sort,
-                productCategory,
+                categoryId,
                 keyword
         ).map(ProductResponseDto::from);
     }
@@ -87,7 +93,7 @@ public class ProductService {
                 .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
 
         if (userId != null) {
-            viewHistoryService.record(userId, product.getId(), product.getProductCategory());
+            viewHistoryService.record(userId, product.getId(), product.getCategoryId());
         }
 
         return ProductResponseDto.from(product);
@@ -106,12 +112,15 @@ public class ProductService {
         int oldPrice = product.getPrice();
         int newPrice = requestDto.getPrice();
 
+        Category category = categoryRepository.findByIdAndIsDeletedFalse(requestDto.getCategoryId())
+                .orElseThrow(() -> new CategoryException(CategoryErrorCode.CATEGORY_NOT_FOUND));
+
         product.update(requestDto.getTitle(),
                 requestDto.getContents(),
                 requestDto.getPrice(),
                 requestDto.getStock(),
                 requestDto.getProductStatus(),
-                requestDto.getProductCategory());
+                category);
 
         // 가격이 낮아졌으면 (할인) 조회했던 사용자에게 알림
         if (newPrice < oldPrice) {

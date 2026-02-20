@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.domain.product.domain.model.ProductCategory;
 import org.example.global.config.entity.BaseEntity;
 
 @Entity
@@ -21,16 +20,15 @@ public class ViewHistory extends BaseEntity {
 
     private Long productId;
 
-    @Enumerated(EnumType.STRING)
-    private ProductCategory productCategory;
+    private Long categoryId;
 
-    private ViewHistory(Long userId, Long productId, ProductCategory productCategory) {
+    private ViewHistory(Long userId, Long productId, Long categoryId) {
         this.userId = userId;
         this.productId = productId;
-        this.productCategory = productCategory;
+        this.categoryId = categoryId;
     }
 
-    public static ViewHistory of(Long userId, Long productId, ProductCategory productCategory) {
-        return new ViewHistory(userId, productId, productCategory);
+    public static ViewHistory of(Long userId, Long productId, Long categoryId) {
+        return new ViewHistory(userId, productId, categoryId);
     }
 }

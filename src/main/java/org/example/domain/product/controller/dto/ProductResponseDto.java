@@ -2,7 +2,6 @@ package org.example.domain.product.controller.dto;
 
 import lombok.Getter;
 import org.example.domain.product.domain.model.Product;
-import org.example.domain.product.domain.model.ProductCategory;
 import org.example.domain.product.domain.model.ProductStatus;
 import org.example.domain.product.domain.model.StockStatus;
 
@@ -25,7 +24,9 @@ public class ProductResponseDto {
 
     private ProductStatus productStatus;
 
-    private ProductCategory productCategory;
+    private Long categoryId;
+
+    private String categoryName;
 
     private StockStatus stockStatus;
 
@@ -39,14 +40,13 @@ public class ProductResponseDto {
         this.contents = product.getContents();
         this.price = product.getPrice();
         this.productStatus = product.getProductStatus();
-        this.productCategory = product.getProductCategory();
+        this.categoryId = product.getCategoryId();
+        this.categoryName = product.getCategory() != null ? product.getCategory().getName() : null;
         this.stockStatus = product.getStockStatus();
         this.createdAt = product.getCreatedAt();
     }
 
     public static ProductResponseDto from(Product product) {
-    return new ProductResponseDto(product
-    );
-
+        return new ProductResponseDto(product);
     }
 }

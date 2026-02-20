@@ -3,15 +3,12 @@ package org.example.domain.product.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.domain.product.controller.dto.*;
-import org.example.domain.product.domain.model.ProductCategory;
 import org.example.domain.product.service.ProductService;
 
 import org.example.global.security.jwt.CustomUserDetails;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -38,13 +35,11 @@ public class ProductController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false)ProductCategory productCategory,
-            @RequestParam(required = false)String keyword
-            ) {
-
-        //카테고리도 추가해야한다!!
-       Page<ProductResponseDto> responseDto = productService.getProducts(page,size,sort,productCategory,keyword);
-       return ResponseEntity.ok().body(responseDto);
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String keyword
+    ) {
+        Page<ProductResponseDto> responseDto = productService.getProducts(page, size, sort, categoryId, keyword);
+        return ResponseEntity.ok().body(responseDto);
     }
 
     //내 상품 조회

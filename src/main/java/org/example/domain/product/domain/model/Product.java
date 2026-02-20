@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.domain.category.domain.model.Category;
 import org.example.domain.user.domain.model.User;
 import org.example.global.config.entity.BaseEntity;
 
@@ -39,12 +40,16 @@ public class Product extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private ProductStatus productStatus;
 
-    @Enumerated(EnumType.STRING)
-    private ProductCategory productCategory;
+    @Column(name = "category_id")
+    private Long categoryId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", insertable = false, updatable = false)
+    private Category category;
 
     private boolean isDeleted = false;
 
-    private Product(User seller, String title, String contents, int price, int stock, ProductStatus productStatus, ProductCategory productCategory) {
+    private Product(User seller, String title, String contents, int price, int stock, ProductStatus productStatus, Category category) {
         if (seller == null) {
             throw new ProductException(ProductErrorCode.SELLER_REQUIRED);
         }
@@ -67,14 +72,15 @@ public class Product extends BaseEntity {
             throw new ProductException(ProductErrorCode.INVALID_OUT_OF_STOCK_STATUS_CHANGE);
         }
         this.productStatus = productStatus;
-        if (productCategory == null) {
+        if (category == null) {
             throw new ProductException(ProductErrorCode.VALID_NON_NULL_PRODUCT_CATEGORY);
         }
-        this.productCategory = productCategory;
+        this.categoryId = category.getId();
+        this.category = category;
     }
 
-    public static Product of(User seller, String title, String contents, int price, int stock, ProductStatus productStatus, ProductCategory productCategory) {
-        return new Product(seller, title, contents, price, stock, productStatus, productCategory);
+    public static Product of(User seller, String title, String contents, int price, int stock, ProductStatus productStatus, Category category) {
+        return new Product(seller, title, contents, price, stock, productStatus, category);
     }
 
     public void validateSeller(Long userId) {
@@ -88,39 +94,42 @@ public class Product extends BaseEntity {
     }
 
     public void update(String title,
-                               String contents,
-                               int price,
-                               int stock,
+                       String contents,
+                       int price,
+                       int stock,
                        ProductStatus productStatus,
-                       ProductCategory productCategory){
+                       Category category) {
 
         if (title != null) this.title = title;
         if (contents != null) this.contents = contents;
-        if (price <= 0 ) {
+        if (price <= 0) {
             throw new ProductException(ProductErrorCode.VALID_NON_ZERO_PRICE);
         }
-        if (stock < 0 ) {
+        if (stock < 0) {
             throw new ProductException(ProductErrorCode.VALID_NON_ZERO_STOCK);
         }
 
         this.price = price;
 
         this.stock = stock;
-        if (productStatus == OUT_OF_STOCK && stock != 0 ) {
+        if (productStatus == OUT_OF_STOCK && stock != 0) {
             throw new ProductException(ProductErrorCode.INVALID_OUT_OF_STOCK_STATUS_CHANGE);
         }
-        if (productStatus == ON_SALE && stock <= 0 ) {
+        if (productStatus == ON_SALE && stock <= 0) {
             throw new ProductException(ProductErrorCode.INVALID_OUT_OF_STOCK_STATUS_CHANGE);
         }
         if (productStatus != null) this.productStatus = productStatus;
-        if (productCategory != null)this.productCategory = productCategory;
+        if (category != null) {
+            this.categoryId = category.getId();
+            this.category = category;
+        }
     }
 
     public void updateProductStatus(ProductStatus productStatus) {
-        if (productStatus == OUT_OF_STOCK && stock != 0 ) {
+        if (productStatus == OUT_OF_STOCK && stock != 0) {
             throw new ProductException(ProductErrorCode.INVALID_OUT_OF_STOCK_STATUS_CHANGE);
         }
-        if (productStatus == ON_SALE && stock <= 0 ) {
+        if (productStatus == ON_SALE && stock <= 0) {
             throw new ProductException(ProductErrorCode.INVALID_OUT_OF_STOCK_STATUS_CHANGE);
         }
         this.productStatus = productStatus;

@@ -1,6 +1,5 @@
 package org.example.domain.viewhistory.domain.repository;
 
-import org.example.domain.product.domain.model.ProductCategory;
 import org.example.domain.viewhistory.domain.model.ViewHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,6 +17,6 @@ public interface ViewHistoryRepository extends JpaRepository<ViewHistory, Long> 
     @Query("SELECT DISTINCT v.userId FROM ViewHistory v WHERE v.productId = :productId")
     List<Long> findUserIdsByProductId(Long productId);
 
-    @Query("SELECT DISTINCT v.userId FROM ViewHistory v WHERE v.productCategory = :category")
-    List<Long> findUserIdsByProductCategory(ProductCategory category);
+    @Query("SELECT DISTINCT v.userId FROM ViewHistory v WHERE v.categoryId = :categoryId")
+    List<Long> findUserIdsByCategoryId(Long categoryId);
 }
