@@ -75,7 +75,9 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "https://sagopalgo-front-handokeis-projects.vercel.app"
+                "https://sagopalgo-front-handokeis-projects.vercel.app",
+                "https://sagopalgo-front.vercel.app",
+                "https://sagopalgo-frontend.vercel.app"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
