@@ -1,9 +1,7 @@
 package org.example.domain.product.controller.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.example.domain.product.domain.model.Product;
-import org.example.domain.product.domain.model.ProductCategory;
 import org.example.domain.product.domain.model.ProductStatus;
 
 @Getter
@@ -25,7 +23,9 @@ public class ProductCreateResponseDto {
 
     private ProductStatus productStatus;
 
-    private ProductCategory productCategory;
+    private Long categoryId;
+
+    private String categoryName;
 
     public ProductCreateResponseDto(Product product) {
         this.id = product.getId();
@@ -36,7 +36,8 @@ public class ProductCreateResponseDto {
         this.price = product.getPrice();
         this.stock = product.getStock();
         this.productStatus = product.getProductStatus();
-        this.productCategory = product.getProductCategory();
+        this.categoryId = product.getCategoryId();
+        this.categoryName = product.getCategory() != null ? product.getCategory().getName() : null;
     }
 
     public static ProductCreateResponseDto from(Product product) {

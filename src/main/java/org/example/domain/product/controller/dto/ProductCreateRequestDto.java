@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.domain.product.domain.model.ProductCategory;
 import org.example.domain.product.domain.model.ProductStatus;
 
 @Getter
@@ -32,7 +31,5 @@ public class ProductCreateRequestDto {
     private ProductStatus productStatus;
 
     @NotNull
-    private ProductCategory productCategory;
-
-
+    private Long categoryId;
 }
