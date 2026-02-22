@@ -52,6 +52,10 @@ dependencies {
     // Monitoring
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
+    // Redis & Redisson (분산 락)
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.redisson:redisson-spring-boot-starter:3.27.0'
 }
 
     tasks.named('test') {
