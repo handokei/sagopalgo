@@ -18,8 +18,7 @@ import org.example.domain.order.exception.OrderErrorCode;
 import org.example.domain.order.exception.OrderException;
 import org.example.domain.product.domain.model.Product;
 import org.example.domain.product.domain.repository.ProductRepository;
-import org.example.domain.product.exception.ProductErrorCode;
-import org.example.domain.product.exception.ProductException;
+import org.example.domain.product.service.StockService;
 import org.example.domain.user.domain.repository.UserRepository;
 import org.example.domain.user.exception.UserErrorCode;
 import org.example.domain.user.exception.UserException;
@@ -41,6 +40,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final CartService cartService;
+    private final StockService stockService;
 
     @Transactional
     public OrderCreateResponseDto createOrder(Long userId, @Valid OrderCreateRequestDto requestDto) {
@@ -49,10 +49,10 @@ public class OrderService {
 
         List<OrderItem> orderItems = requestDto.getItems().stream()
                 .map(itemDto -> {
-                    Product product = productRepository.findByIdWithLock(itemDto.getProductId())
-                            .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
-
-                    product.decreaseStock(itemDto.getQuantity());
+                    Product product = stockService.decreaseStock(
+                            itemDto.getProductId(),
+                            itemDto.getQuantity()
+                    );
 
                     return OrderItem.of(
                             itemDto.getProductId(),
@@ -133,9 +133,7 @@ public class OrderService {
         order.getDelivery().cancel();
 
         for (OrderItem orderItem : order.getOrderItems()) {
-            Product product = productRepository.findByIdWithLock(orderItem.getProductId())
-                    .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
-            product.restoreStock(orderItem.getQuantity());
+            stockService.restoreStock(orderItem.getProductId(), orderItem.getQuantity());
         }
 
         notificationService.send(userId, NotificationType.ORDER_CANCELED,
