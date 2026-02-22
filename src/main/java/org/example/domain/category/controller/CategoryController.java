@@ -7,6 +7,7 @@ import org.example.domain.category.controller.dto.CategoryResponseDto;
 import org.example.domain.category.controller.dto.CategoryUpdateRequestDto;
 import org.example.domain.category.service.CategoryService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryResponseDto> create(
             @RequestBody @Valid CategoryCreateRequestDto requestDto
     ) {
@@ -39,6 +41,7 @@ public class CategoryController {
     }
 
     @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryResponseDto> update(
             @PathVariable Long id,
             @RequestBody @Valid CategoryUpdateRequestDto requestDto
@@ -48,6 +51,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         categoryService.delete(id);
         return ResponseEntity.ok(null);
