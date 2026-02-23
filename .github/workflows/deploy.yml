@@ -61,13 +61,13 @@ jobs:
             git pull origin dev
 
             # .env 파일 생성
-            cat > .env << 'ENVEOF'
-            DB_URL=${{ secrets.DB_URL }}
-            DB_USERNAME=${{ secrets.DB_USERNAME }}
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
-            REDIS_HOST=${{ secrets.REDIS_HOST }}
-            ENVEOF
+            cat > .env << 'EOF'
+DB_URL=${{ secrets.DB_URL }}
+DB_USERNAME=${{ secrets.DB_USERNAME }}
+DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+REDIS_HOST=${{ secrets.REDIS_HOST }}
+EOF
 
             # 배포
             docker pull ${{ env.DOCKER_IMAGE }}:latest
