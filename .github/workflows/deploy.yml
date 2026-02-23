@@ -46,10 +46,18 @@ jobs:
     steps:
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          DOCKER_IMAGE: ${{ env.DOCKER_IMAGE }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: DB_URL,DB_USERNAME,DB_PASSWORD,JWT_SECRET_KEY,REDIS_HOST,DOCKER_IMAGE
           script: |
             # 레포지토리 클론 또는 업데이트
             if [ ! -d ~/sagopalgo ]; then
@@ -61,16 +69,14 @@ jobs:
             git pull origin dev
 
             # .env 파일 생성
-            cat > .env << 'EOF'
-DB_URL=${{ secrets.DB_URL }}
-DB_USERNAME=${{ secrets.DB_USERNAME }}
-DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
-REDIS_HOST=${{ secrets.REDIS_HOST }}
-EOF
+            echo "DB_URL=${DB_URL}" > .env
+            echo "DB_USERNAME=${DB_USERNAME}" >> .env
+            echo "DB_PASSWORD=${DB_PASSWORD}" >> .env
+            echo "JWT_SECRET_KEY=${JWT_SECRET_KEY}" >> .env
+            echo "REDIS_HOST=${REDIS_HOST}" >> .env
 
             # 배포
-            docker pull ${{ env.DOCKER_IMAGE }}:latest
+            docker pull ${DOCKER_IMAGE}:latest
             docker-compose -f docker-compose.prod.yml down || true
             docker-compose -f docker-compose.prod.yml up -d
             docker image prune -f
