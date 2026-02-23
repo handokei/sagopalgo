@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  app:
+    image: handokei/sagopalgo:latest
+    container_name: sagopalgo
+    network_mode: host
+    environment:
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - REDIS_HOST=${REDIS_HOST}
+    restart: unless-stopped
