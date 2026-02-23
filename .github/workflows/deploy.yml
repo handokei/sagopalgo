@@ -51,16 +51,26 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # 레포지토리 클론 또는 업데이트
+            if [ ! -d ~/sagopalgo ]; then
+              git clone https://github.com/handokei/sagopalgo.git ~/sagopalgo
+            fi
+            cd ~/sagopalgo
+            git fetch origin dev
+            git checkout dev
+            git pull origin dev
+
+            # .env 파일 생성
+            cat > .env << 'ENVEOF'
+            DB_URL=${{ secrets.DB_URL }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            ENVEOF
+
+            # 배포
             docker pull ${{ env.DOCKER_IMAGE }}:latest
-            docker stop sagopalgo || true
-            docker rm sagopalgo || true
-            docker run -d \
-              --name sagopalgo \
-              -p 8080:8080 \
-              -e "DB_URL=${{ secrets.DB_URL }}" \
-              -e "DB_USERNAME=${{ secrets.DB_USERNAME }}" \
-              -e "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" \
-              -e "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" \
-              -e "REDIS_HOST=${{ secrets.REDIS_HOST }}" \
-              ${{ env.DOCKER_IMAGE }}:latest
+            docker-compose -f docker-compose.prod.yml down || true
+            docker-compose -f docker-compose.prod.yml up -d
             docker image prune -f
