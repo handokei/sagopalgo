@@ -52,7 +52,10 @@ public class SecurityConfig {
                                 "/api/carts/guest/**",
                                 "/api/bills/**",
                                 "/ws/**",
-                                "/actuator/**"
+                                "/actuator/**",
+                                "/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
                         ).permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/products/**")
