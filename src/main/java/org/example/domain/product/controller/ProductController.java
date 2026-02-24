@@ -28,7 +28,7 @@ public class ProductController {
             ) {
         Long userId = userDetails.getId();
         ProductCreateResponseDto responseDto = productService.createProduct(userId, requestDto);
-        return ResponseEntity.ok().body(responseDto);
+        return ResponseEntity.status(201).body(responseDto);
     }
     //다건 조회
     @GetMapping
@@ -49,13 +49,13 @@ public class ProductController {
 
     //내 상품 조회
     @GetMapping("/me")
-    public ResponseEntity<Page<ProductResponseDto>> getMyProducts(
+    public ResponseEntity<Page<ProductMyResponseDto>> getMyProducts(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         Long userId = userDetails.getId();
-        Page<ProductResponseDto> responseDto = productService.getMyProducts(userId, page, size);
+        Page<ProductMyResponseDto> responseDto = productService.getMyProducts(userId, page, size);
         return ResponseEntity.ok().body(responseDto);
     }
 
@@ -109,6 +109,6 @@ public class ProductController {
     ) {
         productService.deleted(productId,userDetails.getId());
 
-        return ResponseEntity.ok(null);
+        return ResponseEntity.noContent().build();
     }
 }

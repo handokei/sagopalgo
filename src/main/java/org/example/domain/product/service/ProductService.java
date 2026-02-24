@@ -85,10 +85,10 @@ public class ProductService {
         ).map(ProductResponseDto::from);
     }
 
-    public Page<ProductResponseDto> getMyProducts(Long userId, int page, int size) {
+    public Page<ProductMyResponseDto> getMyProducts(Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return productRepository.findBySellerIdAndIsDeletedFalse(userId, pageable)
-                .map(ProductResponseDto::from);
+                .map(ProductMyResponseDto::from);
     }
 
     @Transactional
