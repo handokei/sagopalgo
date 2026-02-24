@@ -25,7 +25,7 @@ public class CategoryController {
             @RequestBody @Valid CategoryCreateRequestDto requestDto
     ) {
         CategoryResponseDto responseDto = categoryService.create(requestDto);
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.status(201).body(responseDto);
     }
 
     @GetMapping
@@ -54,6 +54,6 @@ public class CategoryController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         categoryService.delete(id);
-        return ResponseEntity.ok(null);
+        return ResponseEntity.noContent().build();
     }
 }

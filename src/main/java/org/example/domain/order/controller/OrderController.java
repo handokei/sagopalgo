@@ -30,7 +30,7 @@ public class OrderController {
             ) {
         Long userId = userDetails.getId();
         OrderCreateResponseDto responseDto = orderService.createOrder(userId, requestDto);
-        return ResponseEntity.ok().body(responseDto);
+        return ResponseEntity.status(201).body(responseDto);
     }
 
 

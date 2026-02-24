@@ -1,0 +1,1341 @@
+openapi: 3.0.3
+info:
+  title: sagopalgo API
+  version: 1.0.0
+  description: 중고 판매 커머스 API 명세
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: Users
+  - name: Products
+  - name: ProductImages
+  - name: Orders
+  - name: Carts
+  - name: Reviews
+  - name: Categories
+  - name: Likes
+  - name: Notifications
+paths:
+  /api/users/register:
+    post:
+      tags: [Users]
+      summary: 회원가입
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+      responses:
+        '201':
+          description: Created
+  /api/users/login:
+    post:
+      tags: [Users]
+      summary: 로그인
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserLoginResponse'
+  /api/users:
+    get:
+      tags: [Users]
+      summary: 회원 조회(내 정보)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserReadResponse'
+  /api/users/me:
+    get:
+      tags: [Users]
+      summary: 내 정보 조회
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserReadResponse'
+    patch:
+      tags: [Users]
+      summary: 내 정보 수정
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserModifiedRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserReadResponse'
+  /api/users/{id}:
+    patch:
+      tags: [Users]
+      summary: 회원 수정
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserModifiedRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserReadResponse'
+
+  /api/products:
+    post:
+      tags: [Products]
+      summary: 상품 생성
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductCreateResponse'
+    get:
+      tags: [Products]
+      summary: 상품 목록 조회
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 10 }
+        - name: sort
+          in: query
+          schema: { type: string }
+        - name: categoryId
+          in: query
+          schema: { type: integer, format: int64 }
+        - name: keyword
+          in: query
+          schema: { type: string }
+        - name: minPrice
+          in: query
+          schema: { type: integer }
+        - name: maxPrice
+          in: query
+          schema: { type: integer }
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ProductStatus'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageProductResponse'
+  /api/products/me:
+    get:
+      tags: [Products]
+      summary: 내 상품 조회
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 10 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageProductMyResponse'
+  /api/products/{id}:
+    get:
+      tags: [Products]
+      summary: 상품 단건 조회
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+  /api/products/{productId}:
+    patch:
+      tags: [Products]
+      summary: 상품 수정
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpdateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+    delete:
+      tags: [Products]
+      summary: 상품 삭제
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '204':
+          description: No Content
+  /api/products/{id}/status:
+    patch:
+      tags: [Products]
+      summary: 상품 상태 수정
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductStatusUpdateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+
+  /api/products/{productId}/images:
+    post:
+      tags: [ProductImages]
+      summary: 상품 이미지 업로드
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductImageResponse'
+    get:
+      tags: [ProductImages]
+      summary: 상품 이미지 목록 조회
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductImageResponse'
+  /api/products/{productId}/images/{imageId}:
+    delete:
+      tags: [ProductImages]
+      summary: 상품 이미지 삭제
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+        - name: imageId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '204':
+          description: No Content
+  /api/products/images/{fileName}:
+    get:
+      tags: [ProductImages]
+      summary: 상품 이미지 파일 조회
+      parameters:
+        - name: fileName
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+
+  /api/orders:
+    post:
+      tags: [Orders]
+      summary: 주문 생성
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderCreateResponse'
+    get:
+      tags: [Orders]
+      summary: 주문 목록 조회
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 10 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageOrderResponse'
+  /api/orders/{id}:
+    get:
+      tags: [Orders]
+      summary: 주문 단건 조회
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+  /api/orders/{id}/pay:
+    patch:
+      tags: [Orders]
+      summary: 주문 결제
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderStatusResponse'
+  /api/orders/{id}/cancel:
+    patch:
+      tags: [Orders]
+      summary: 주문 취소
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderStatusResponse'
+  /api/orders/{id}/ship:
+    patch:
+      tags: [Orders]
+      summary: 주문 배송 시작
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderStatusResponse'
+  /api/orders/{id}/complete:
+    patch:
+      tags: [Orders]
+      summary: 주문 배송 완료
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderStatusResponse'
+
+  /api/carts/me/items:
+    post:
+      tags: [Carts]
+      summary: 장바구니 담기(회원)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartCreateRequest'
+      responses:
+        '201':
+          description: Created
+  /api/carts/me:
+    get:
+      tags: [Carts]
+      summary: 장바구니 조회(회원)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 10 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageCartResponse'
+  /api/carts/me/items/{id}:
+    delete:
+      tags: [Carts]
+      summary: 장바구니 삭제(회원)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '204':
+          description: No Content
+    patch:
+      tags: [Carts]
+      summary: 장바구니 수량 변경(회원)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItemUpdateRequest'
+      responses:
+        '204':
+          description: No Content
+
+  /api/carts/guest/items:
+    post:
+      tags: [Carts]
+      summary: 장바구니 담기(게스트)
+      parameters:
+        - name: guestKey
+          in: cookie
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartCreateRequest'
+      responses:
+        '201':
+          description: Created
+  /api/carts/guest:
+    get:
+      tags: [Carts]
+      summary: 장바구니 조회(게스트)
+      parameters:
+        - name: guestKey
+          in: cookie
+          required: true
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 10 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageCartResponse'
+  /api/carts/guest/items/{id}:
+    delete:
+      tags: [Carts]
+      summary: 장바구니 삭제(게스트)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+        - name: guestKey
+          in: cookie
+          required: true
+          schema: { type: string }
+      responses:
+        '204':
+          description: No Content
+    patch:
+      tags: [Carts]
+      summary: 장바구니 수량 변경(게스트)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+        - name: guestKey
+          in: cookie
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItemUpdateRequest'
+      responses:
+        '204':
+          description: No Content
+
+  /api/products/{productId}/reviews:
+    post:
+      tags: [Reviews]
+      summary: 리뷰 작성
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewResponse'
+    get:
+      tags: [Reviews]
+      summary: 상품 리뷰 조회
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 10 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageReviewResponse'
+  /api/products/{productId}/reviews/summary:
+    get:
+      tags: [Reviews]
+      summary: 리뷰 요약
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewSummaryResponse'
+  /api/reviews/me:
+    get:
+      tags: [Reviews]
+      summary: 내 리뷰 조회
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 10 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageReviewResponse'
+  /api/reviews/{id}:
+    patch:
+      tags: [Reviews]
+      summary: 리뷰 수정
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewUpdateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewResponse'
+    delete:
+      tags: [Reviews]
+      summary: 리뷰 삭제
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '204':
+          description: No Content
+
+  /api/categories:
+    post:
+      tags: [Categories]
+      summary: 카테고리 생성(관리자)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+    get:
+      tags: [Categories]
+      summary: 카테고리 목록 조회
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoryResponse'
+  /api/categories/{id}:
+    get:
+      tags: [Categories]
+      summary: 카테고리 단건 조회
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+    patch:
+      tags: [Categories]
+      summary: 카테고리 수정(관리자)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+    delete:
+      tags: [Categories]
+      summary: 카테고리 삭제(관리자)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '204':
+          description: No Content
+
+  /api/products/{id}/likes:
+    post:
+      tags: [Likes]
+      summary: 상품 좋아요 토글
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductLikesCreateResponse'
+  /api/products/{id}/likes/check:
+    get:
+      tags: [Likes]
+      summary: 좋아요 여부 확인
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  liked:
+                    type: boolean
+  /api/products/me/likes:
+    get:
+      tags: [Likes]
+      summary: 내가 좋아요한 상품 목록
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 10 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageProductLikeResponse'
+
+  /api/notifications:
+    get:
+      tags: [Notifications]
+      summary: 알림 목록 조회
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageNotificationResponse'
+  /api/notifications/unread-count:
+    get:
+      tags: [Notifications]
+      summary: 읽지 않은 알림 수
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    format: int64
+  /api/notifications/{id}/read:
+    patch:
+      tags: [Notifications]
+      summary: 알림 읽음 처리
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationResponse'
+  /api/notifications/read-all:
+    patch:
+      tags: [Notifications]
+      summary: 알림 전체 읽음 처리
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UserCreateRequest:
+      type: object
+      required: [email, password, confirmPassword, name, nickname, userRole]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password }
+        confirmPassword: { type: string, format: password }
+        name: { type: string }
+        nickname: { type: string }
+        userRole:
+          $ref: '#/components/schemas/UserRole'
+    UserLoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password }
+    UserLoginResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        accessToken: { type: string }
+        refreshToken: { type: string }
+    UserReadResponse:
+      type: object
+      properties:
+        email: { type: string, format: email }
+        name: { type: string }
+        nickname: { type: string }
+    UserModifiedRequest:
+      type: object
+      required: [nickname, password, confirmPassword]
+      properties:
+        nickname: { type: string }
+        password: { type: string, format: password }
+        confirmPassword: { type: string, format: password }
+
+    ProductCreateRequest:
+      type: object
+      required: [title, contents, price, stock, productStatus, categoryId]
+      properties:
+        title: { type: string }
+        contents: { type: string }
+        price: { type: integer }
+        stock: { type: integer }
+        productStatus:
+          $ref: '#/components/schemas/ProductStatus'
+        categoryId: { type: integer, format: int64 }
+    ProductUpdateRequest:
+      type: object
+      required: [title, contents, price, stock, productStatus, categoryId]
+      properties:
+        title: { type: string }
+        contents: { type: string }
+        price: { type: integer }
+        stock: { type: integer }
+        productStatus:
+          $ref: '#/components/schemas/ProductStatus'
+        categoryId: { type: integer, format: int64 }
+    ProductStatusUpdateRequest:
+      type: object
+      required: [productStatus]
+      properties:
+        productStatus:
+          $ref: '#/components/schemas/ProductStatus'
+    ProductCreateResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        sellerId: { type: integer, format: int64 }
+        sellerNickname: { type: string }
+        title: { type: string }
+        contents: { type: string }
+        price: { type: integer }
+        stock: { type: integer }
+        productStatus:
+          $ref: '#/components/schemas/ProductStatus'
+        categoryId: { type: integer, format: int64 }
+        categoryName: { type: string, nullable: true }
+    ProductResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        sellerId: { type: integer, format: int64 }
+        sellerNickname: { type: string }
+        title: { type: string }
+        contents: { type: string }
+        price: { type: integer }
+        productStatus:
+          $ref: '#/components/schemas/ProductStatus'
+        categoryId: { type: integer, format: int64 }
+        categoryName: { type: string, nullable: true }
+        stockStatus:
+          $ref: '#/components/schemas/StockStatus'
+        createdAt: { type: string, format: date-time }
+    ProductMyResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        title: { type: string }
+        stock: { type: integer }
+        price: { type: integer }
+        productStatus:
+          $ref: '#/components/schemas/ProductStatus'
+        stockStatus:
+          $ref: '#/components/schemas/StockStatus'
+    ProductImageResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        imageUrl: { type: string }
+        originalFileName: { type: string }
+        sortOrder: { type: integer }
+        isMain: { type: boolean }
+
+    CartCreateRequest:
+      type: object
+      required: [productId, quantity]
+      properties:
+        productId: { type: integer, format: int64 }
+        quantity: { type: integer }
+    CartItemUpdateRequest:
+      type: object
+      required: [quantity]
+      properties:
+        quantity: { type: integer }
+    CartResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        productId: { type: integer, format: int64 }
+        productTitle: { type: string }
+        productPrice: { type: integer }
+        productImageUrl: { type: string }
+        quantity: { type: integer }
+
+    OrderItemRequest:
+      type: object
+      required: [productId, quantity]
+      properties:
+        productId: { type: integer, format: int64 }
+        quantity: { type: integer, minimum: 1 }
+    OrderCreateRequest:
+      type: object
+      required: [items, name, phoneNumber, address]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemRequest'
+        name: { type: string }
+        phoneNumber: { type: string }
+        address: { type: string }
+    OrderCreateResponse:
+      type: object
+      properties:
+        orderId: { type: integer, format: int64 }
+        orderNumber: { type: string }
+        totalPrice: { type: integer }
+        orderStatus:
+          $ref: '#/components/schemas/OrderStatus'
+    OrderResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        productTitle: { type: string }
+        totalPrice: { type: integer }
+        orderStatus:
+          $ref: '#/components/schemas/OrderStatus'
+        recipientName: { type: string, nullable: true }
+        phoneNumber: { type: string, nullable: true }
+        address: { type: string, nullable: true }
+        deliveryStatus:
+          $ref: '#/components/schemas/DeliveryStatus'
+        createAt: { type: string, format: date-time }
+    OrderStatusResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        modifiedAt: { type: string, format: date-time }
+
+    ReviewCreateRequest:
+      type: object
+      required: [rating]
+      properties:
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        contents: { type: string, maxLength: 500 }
+    ReviewUpdateRequest:
+      type: object
+      required: [rating]
+      properties:
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        contents: { type: string, maxLength: 500 }
+    ReviewResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        userId: { type: integer, format: int64 }
+        productId: { type: integer, format: int64 }
+        rating: { type: integer }
+        contents: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ReviewSummaryResponse:
+      type: object
+      properties:
+        averageRating: { type: number, format: double }
+        reviewCount: { type: integer, format: int64 }
+
+    CategoryCreateRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, maxLength: 50 }
+        description: { type: string, maxLength: 200 }
+    CategoryUpdateRequest:
+      type: object
+      properties:
+        name: { type: string, maxLength: 50 }
+        description: { type: string, maxLength: 200 }
+    CategoryResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    ProductLikesCreateResponse:
+      type: object
+      properties:
+        liked: { type: boolean }
+    ProductLikeResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        productId: { type: integer, format: int64 }
+        productTitle: { type: string }
+        productPrice: { type: integer }
+        productStatus:
+          $ref: '#/components/schemas/ProductStatus'
+
+    NotificationResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        type:
+          $ref: '#/components/schemas/NotificationType'
+        message: { type: string }
+        referenceId: { type: integer, format: int64 }
+        isRead: { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    PageProductResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductResponse'
+        totalElements: { type: integer, format: int64 }
+        totalPages: { type: integer }
+        size: { type: integer }
+        number: { type: integer }
+        numberOfElements: { type: integer }
+        first: { type: boolean }
+        last: { type: boolean }
+        empty: { type: boolean }
+    PageProductMyResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductMyResponse'
+        totalElements: { type: integer, format: int64 }
+        totalPages: { type: integer }
+        size: { type: integer }
+        number: { type: integer }
+        numberOfElements: { type: integer }
+        first: { type: boolean }
+        last: { type: boolean }
+        empty: { type: boolean }
+    PageOrderResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderResponse'
+        totalElements: { type: integer, format: int64 }
+        totalPages: { type: integer }
+        size: { type: integer }
+        number: { type: integer }
+        numberOfElements: { type: integer }
+        first: { type: boolean }
+        last: { type: boolean }
+        empty: { type: boolean }
+    PageReviewResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewResponse'
+        totalElements: { type: integer, format: int64 }
+        totalPages: { type: integer }
+        size: { type: integer }
+        number: { type: integer }
+        numberOfElements: { type: integer }
+        first: { type: boolean }
+        last: { type: boolean }
+        empty: { type: boolean }
+    PageCartResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartResponse'
+        totalElements: { type: integer, format: int64 }
+        totalPages: { type: integer }
+        size: { type: integer }
+        number: { type: integer }
+        numberOfElements: { type: integer }
+        first: { type: boolean }
+        last: { type: boolean }
+        empty: { type: boolean }
+    PageProductLikeResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductLikeResponse'
+        totalElements: { type: integer, format: int64 }
+        totalPages: { type: integer }
+        size: { type: integer }
+        number: { type: integer }
+        numberOfElements: { type: integer }
+        first: { type: boolean }
+        last: { type: boolean }
+        empty: { type: boolean }
+    PageNotificationResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationResponse'
+        totalElements: { type: integer, format: int64 }
+        totalPages: { type: integer }
+        size: { type: integer }
+        number: { type: integer }
+        numberOfElements: { type: integer }
+        first: { type: boolean }
+        last: { type: boolean }
+        empty: { type: boolean }
+
+    UserRole:
+      type: string
+      enum: [ROLE_ADMIN, ROLE_USER]
+    ProductStatus:
+      type: string
+      enum: [ON_SALE, DISCONTINUE, OUT_OF_STOCK]
+    StockStatus:
+      type: string
+      enum: [IN_STOCK, LOW_STOCK, OUT_OF_STOCK]
+    OrderStatus:
+      type: string
+      enum: [CREATED, PAID, SHIPPED, COMPLETED, CANCELED]
+    DeliveryStatus:
+      type: string
+      enum: [PENDING, PREPARING, SHIPPED, DELIVERED, CANCELED]
+    NotificationType:
+      type: string
+      enum: [ORDER_CREATED, ORDER_PAID, ORDER_SHIPPED, ORDER_COMPLETED, ORDER_CANCELED, PRODUCT_DISCOUNT]

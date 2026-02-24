@@ -24,7 +24,7 @@ public class UserController {
            @RequestBody @Valid UserCreateRequestDto requestDto
     ) {
         userService.create(requestDto);
-     return ResponseEntity.ok(null);
+     return ResponseEntity.status(201).build();
     }
 
     //로그인

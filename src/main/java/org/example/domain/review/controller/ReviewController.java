@@ -26,7 +26,7 @@ public class ReviewController {
             @RequestBody @Valid ReviewCreateRequestDto requestDto
     ) {
         ReviewResponseDto responseDto = reviewService.create(userDetails.getId(), productId, requestDto);
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.status(201).body(responseDto);
     }
 
     @GetMapping("/api/products/{productId}/reviews")
@@ -71,6 +71,6 @@ public class ReviewController {
             @PathVariable Long id
     ) {
         reviewService.delete(userDetails.getId(), id);
-        return ResponseEntity.ok(null);
+        return ResponseEntity.noContent().build();
     }
 }
