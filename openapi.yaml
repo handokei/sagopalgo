@@ -206,7 +206,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductResponse'
-  /api/products/{id}:
     patch:
       tags: [Products]
       summary: 상품 수정
