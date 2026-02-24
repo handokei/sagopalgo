@@ -31,7 +31,7 @@ public class ProductImageController {
             @RequestParam("files") List<MultipartFile> files) {
         Long userId = userDetails.getId();
         List<ProductImageResponseDto> images = productImageService.uploadImages(userId, productId, files);
-        return ResponseEntity.ok(images);
+        return ResponseEntity.status(201).body(images);
     }
 
     @DeleteMapping("/{productId}/images/{imageId}")
@@ -41,7 +41,7 @@ public class ProductImageController {
             @PathVariable Long imageId) {
         Long userId = userDetails.getId();
         productImageService.deleteImage(userId, productId, imageId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{productId}/images")

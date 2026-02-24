@@ -31,7 +31,7 @@ public class CartController {
                 userDetails.getId().toString(),
                 requestDto);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(201).build();
     }
 
     @GetMapping("/me")
@@ -95,7 +95,7 @@ public class CartController {
                 guestKey,
                 requestDto);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(201).build();
     }
 
     @GetMapping("/guest")
