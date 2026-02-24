@@ -72,14 +72,14 @@ public class ProductController {
     }
 
     //제품 수정
-    @PatchMapping("/{productId}")
+    @PatchMapping("/{id}")
     public ResponseEntity<ProductResponseDto> updateProduct(
-            @PathVariable Long productId,
+            @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid ProductUpdateRequestDto requestDto
 
     ) {
-        ProductResponseDto responseDto = productService.update(productId, userDetails.getId(), requestDto);
+        ProductResponseDto responseDto = productService.update(id, userDetails.getId(), requestDto);
 
         return ResponseEntity.ok().body(responseDto);
     }
@@ -102,12 +102,12 @@ public class ProductController {
     }
 
     //제품 삭제
-    @DeleteMapping("/{productId}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletedProduct(
-            @PathVariable Long productId,
+            @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        productService.deleted(productId,userDetails.getId());
+        productService.deleted(id,userDetails.getId());
 
         return ResponseEntity.noContent().build();
     }
