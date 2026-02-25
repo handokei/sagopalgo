@@ -1,6 +1,7 @@
 package org.example.domain.product.controller.dto;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.example.domain.product.domain.model.Product;
 import org.example.domain.product.domain.model.ProductStatus;
 import org.example.domain.product.domain.model.StockStatus;
@@ -8,6 +9,7 @@ import org.example.domain.product.domain.model.StockStatus;
 import java.time.LocalDateTime;
 
 @Getter
+@NoArgsConstructor
 public class ProductResponseDto {
 
     private Long id;

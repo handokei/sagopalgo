@@ -20,6 +20,7 @@ import org.example.domain.notification.domain.model.NotificationType;
 import org.example.domain.notification.service.NotificationService;
 import org.example.domain.viewhistory.service.ViewHistoryService;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,6 +41,7 @@ public class ProductService {
     private final ViewHistoryService viewHistoryService;
     private final NotificationService notificationService;
     private final ProductLikeRepository productLikeRepository;
+    private final ProductCacheService productCacheService;
 
 
     @Transactional
@@ -64,6 +66,7 @@ public class ProductService {
                 category);
 
         productRepository.save(product);
+        productCacheService.evictAllProductList();
 
         return ProductCreateResponseDto.from(product);
     }
@@ -72,17 +75,23 @@ public class ProductService {
     public Page<ProductResponseDto> getProducts(int page, int size, String sort, Long categoryId, String keyword,
                                                  Integer minPrice, Integer maxPrice, ProductStatus status) {
 
-        Pageable pageable = PageRequest.of(page, size);
+        String cacheKey = productCacheService.generateListCacheKey(
+                page, size, sort, categoryId, keyword, minPrice, maxPrice, status);
 
-        return productRepository.search(
-                pageable,
-                sort,
-                categoryId,
-                keyword,
-                minPrice,
-                maxPrice,
-                status
+        List<ProductResponseDto> cached = productCacheService.getProductList(cacheKey);
+        if (cached != null) {
+            return new org.springframework.data.domain.PageImpl<>(
+                    cached, PageRequest.of(page, size), cached.size());
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ProductResponseDto> result = productRepository.search(
+                pageable, sort, categoryId, keyword, minPrice, maxPrice, status
         ).map(ProductResponseDto::from);
+
+        productCacheService.setProductList(cacheKey, result.getContent());
+
+        return result;
     }
 
     public Page<ProductMyResponseDto> getMyProducts(Long userId, int page, int size) {
@@ -132,6 +141,9 @@ public class ProductService {
             sendDiscountNotification(product, oldPrice, newPrice);
         }
 
+        productCacheService.evictProduct(productId);
+        productCacheService.evictAllProductList();
+
         return ProductResponseDto.from(product);
     }
 
@@ -161,8 +173,10 @@ public class ProductService {
                 .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
 
         product.validateSeller(userId);
-
         product.delete();
+
+        productCacheService.evictProduct(productId);
+        productCacheService.evictAllProductList();
     }
 
     @Transactional
@@ -176,6 +190,9 @@ public class ProductService {
         product.validateSeller(userId);
 
         product.updateProductStatus(requestDto.getProductStatus());
+
+        productCacheService.evictProduct(productId);
+        productCacheService.evictAllProductList();
 
         return ProductResponseDto.from(product);
     }
