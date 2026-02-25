@@ -136,11 +136,12 @@ public class ProductService {
     }
 
     private void sendDiscountNotification(Product product, int oldPrice, int newPrice) {
-        // 조회한 사용자 + 찜한 사용자 (중복 제거)
-        Set<Long> userIds = Stream.concat(
+        // 조회한 사용자 + 찜한 사용자 + 같은 카테고리 조회한 사용자 (중복 제거)
+        Set<Long> userIds = Stream.of(
                 viewHistoryService.findUsersByProductId(product.getId()).stream(),
-                productLikeRepository.findUserIdsByProductId(product.getId()).stream()
-        ).collect(Collectors.toSet());
+                productLikeRepository.findUserIdsByProductId(product.getId()).stream(),
+                viewHistoryService.findUsersByCategoryId(product.getCategoryId()).stream()
+        ).flatMap(s -> s).collect(Collectors.toSet());
 
         int discountPercent = (int) ((1 - (double) newPrice / oldPrice) * 100);
         String message = String.format("'%s' 상품이 %d%% 할인 중!",
