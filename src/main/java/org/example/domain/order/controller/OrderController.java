@@ -8,6 +8,7 @@ import org.example.domain.order.controller.dto.OrderCreateRequestDto;
 import org.example.domain.order.controller.dto.OrderCreateResponseDto;
 import org.example.domain.order.controller.dto.OrderResponseDto;
 import org.example.domain.order.controller.dto.OrderStatusResponseDto;
+import org.example.domain.order.service.OrderFacade;
 import org.example.domain.order.service.OrderService;
 import org.example.global.security.jwt.CustomUserDetails;
 import org.springframework.data.domain.Page;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     private final OrderService orderService;
+    private final OrderFacade orderFacade;
 
     //주문 생성
     @PostMapping
@@ -29,7 +31,7 @@ public class OrderController {
             @RequestBody @Valid OrderCreateRequestDto requestDto
             ) {
         Long userId = userDetails.getId();
-        OrderCreateResponseDto responseDto = orderService.createOrder(userId, requestDto);
+        OrderCreateResponseDto responseDto = orderFacade.createOrder(userId, requestDto);
         return ResponseEntity.status(201).body(responseDto);
     }
 
