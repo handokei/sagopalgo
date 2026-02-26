@@ -16,7 +16,7 @@ public class StockService {
 
     @Transactional
     public Product decreaseStock(Long productId, int quantity) {
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findByIdWithLock(productId)
                 .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
 
         product.decreaseStock(quantity);
