@@ -16,9 +16,10 @@ import org.example.domain.user.domain.repository.UserRepository;
 import org.example.domain.user.exception.UserErrorCode;
 import org.example.domain.user.exception.UserException;
 import org.example.domain.product.domain.model.ProductStatus;
-import org.example.domain.notification.domain.model.NotificationType;
-import org.example.domain.notification.service.NotificationService;
+import org.example.domain.notification.event.ProductDiscountNotificationEvent;
 import org.example.domain.viewhistory.service.ViewHistoryService;
+
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 import java.util.Set;
@@ -39,7 +40,7 @@ public class ProductService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final ViewHistoryService viewHistoryService;
-    private final NotificationService notificationService;
+    private final ApplicationEventPublisher eventPublisher;
     private final ProductLikeRepository productLikeRepository;
     private final ProductCacheService productCacheService;
 
@@ -148,20 +149,18 @@ public class ProductService {
     }
 
     private void sendDiscountNotification(Product product, int oldPrice, int newPrice) {
-        // 조회한 사용자 + 찜한 사용자 + 같은 카테고리 조회한 사용자 (중복 제거)
-        Set<Long> userIds = Stream.of(
+        List<Long> userIds = Stream.of(
                 viewHistoryService.findUsersByProductId(product.getId()).stream(),
                 productLikeRepository.findUserIdsByProductId(product.getId()).stream(),
                 viewHistoryService.findUsersByCategoryId(product.getCategoryId()).stream()
-        ).flatMap(s -> s).collect(Collectors.toSet());
+        ).flatMap(s -> s).distinct().collect(Collectors.toList());
+
+        if (userIds.isEmpty()) return;
 
         int discountPercent = (int) ((1 - (double) newPrice / oldPrice) * 100);
-        String message = String.format("'%s' 상품이 %d%% 할인 중!",
-                product.getTitle(), discountPercent);
+        String message = String.format("'%s' 상품이 %d%% 할인 중!", product.getTitle(), discountPercent);
 
-        userIds.forEach(targetUserId ->
-                notificationService.send(targetUserId, NotificationType.PRODUCT_DISCOUNT, message, product.getId())
-        );
+        eventPublisher.publishEvent(new ProductDiscountNotificationEvent(userIds, message, product.getId()));
     }
 
     @Transactional
