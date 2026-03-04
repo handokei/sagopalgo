@@ -3,9 +3,11 @@ package org.example.global.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.example.domain.notification.event.OrderNotificationEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -17,6 +19,22 @@ import java.util.Map;
 
 @Configuration
 public class KafkaConfig {
+
+    @Bean
+    public NewTopic notificationOrderTopic() {
+        return TopicBuilder.name("notification.order")
+                .partitions(3)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    public NewTopic notificationOrderDltTopic() {
+        return TopicBuilder.name("notification.order-dlt")
+                .partitions(3)
+                .replicas(1)
+                .build();
+    }
 
     @Bean
     public ObjectMapper kafkaObjectMapper() {
