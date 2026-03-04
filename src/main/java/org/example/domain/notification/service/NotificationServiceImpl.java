@@ -1,6 +1,7 @@
 package org.example.domain.notification.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.domain.notification.controller.dto.NotificationResponseDto;
 import org.example.domain.notification.domain.model.Notification;
 import org.example.domain.notification.domain.model.NotificationType;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -35,8 +37,11 @@ public class NotificationServiceImpl implements NotificationService {
                     NotificationResponseDto.from(notification)
             );
             notification.markAsSent();
+            log.info("알림 전송 성공 - userId: {}, type: {}, notificationId: {}", userId, type, notification.getId());
         } catch (Exception e) {
             notification.markAsFailed();
+            log.error("알림 전송 실패 - userId: {}, type: {}, notificationId: {}, error: {}",
+                    userId, type, notification.getId(), e.getMessage());
         }
     }
 
