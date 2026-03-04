@@ -6,7 +6,7 @@ import org.example.domain.cart.domain.model.OwnerType;
 import org.example.domain.cart.service.CartService;
 import org.example.domain.delivery.domain.model.Delivery;
 import org.example.domain.notification.domain.model.NotificationType;
-import org.example.domain.notification.service.NotificationService;
+import org.example.domain.notification.event.OrderNotificationEvent;
 import org.example.domain.order.controller.dto.OrderCreateRequestDto;
 import org.example.domain.order.controller.dto.OrderCreateResponseDto;
 import org.example.domain.order.controller.dto.OrderResponseDto;
@@ -22,6 +22,7 @@ import org.example.domain.product.service.StockService;
 import org.example.domain.user.domain.repository.UserRepository;
 import org.example.domain.user.exception.UserErrorCode;
 import org.example.domain.user.exception.UserException;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +39,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
-    private final NotificationService notificationService;
+    private final ApplicationEventPublisher eventPublisher;
     private final CartService cartService;
     private final StockService stockService;
 
@@ -75,8 +76,8 @@ public class OrderService {
         // 장바구니 비우기
         cartService.clearCart(OwnerType.USER, userId.toString());
 
-        notificationService.send(userId, NotificationType.ORDER_CREATED,
-                "주문이 생성되었습니다: " + order.getSummaryTitle(), order.getId());
+        eventPublisher.publishEvent(new OrderNotificationEvent(userId, NotificationType.ORDER_CREATED,
+                "주문이 생성되었습니다: " + order.getSummaryTitle(), order.getId()));
 
         return OrderCreateResponseDto.from(order);
     }
@@ -115,8 +116,8 @@ public class OrderService {
         order.pay();
         order.getDelivery().prepare();
 
-        notificationService.send(userId, NotificationType.ORDER_PAID,
-                "결제가 완료되었습니다: " + order.getSummaryTitle(), order.getId());
+        eventPublisher.publishEvent(new OrderNotificationEvent(userId, NotificationType.ORDER_PAID,
+                "결제가 완료되었습니다: " + order.getSummaryTitle(), order.getId()));
 
         return OrderStatusResponseDto.from(order);
     }
@@ -136,8 +137,8 @@ public class OrderService {
             stockService.restoreStock(orderItem.getProductId(), orderItem.getQuantity());
         }
 
-        notificationService.send(userId, NotificationType.ORDER_CANCELED,
-                "주문이 취소되었습니다: " + order.getSummaryTitle(), order.getId());
+        eventPublisher.publishEvent(new OrderNotificationEvent(userId, NotificationType.ORDER_CANCELED,
+                "주문이 취소되었습니다: " + order.getSummaryTitle(), order.getId()));
 
         return OrderStatusResponseDto.from(order);
     }
@@ -153,8 +154,8 @@ public class OrderService {
         order.shipped();
         order.getDelivery().ship();
 
-        notificationService.send(userId, NotificationType.ORDER_SHIPPED,
-                "배송이 시작되었습니다: " + order.getSummaryTitle(), order.getId());
+        eventPublisher.publishEvent(new OrderNotificationEvent(userId, NotificationType.ORDER_SHIPPED,
+                "배송이 시작되었습니다: " + order.getSummaryTitle(), order.getId()));
 
         return OrderStatusResponseDto.from(order);
     }
@@ -170,8 +171,8 @@ public class OrderService {
         order.completed();
         order.getDelivery().complete();
 
-        notificationService.send(userId, NotificationType.ORDER_COMPLETED,
-                "배송이 완료되었습니다: " + order.getSummaryTitle(), order.getId());
+        eventPublisher.publishEvent(new OrderNotificationEvent(userId, NotificationType.ORDER_COMPLETED,
+                "배송이 완료되었습니다: " + order.getSummaryTitle(), order.getId()));
 
         return OrderStatusResponseDto.from(order);
     }
