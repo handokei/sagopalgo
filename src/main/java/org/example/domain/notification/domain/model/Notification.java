@@ -29,11 +29,15 @@ public class Notification extends BaseEntity {
 
     private boolean isDeleted = false;
 
+    @Enumerated(EnumType.STRING)
+    private NotificationStatus notificationStatus = NotificationStatus.PENDING;
+
     private Notification(Long userId, NotificationType type, String message, Long referenceId) {
         this.userId = userId;
         this.type = type;
         this.message = message;
         this.referenceId = referenceId;
+        this.notificationStatus = NotificationStatus.PENDING;
     }
 
     public static Notification of(Long userId, NotificationType type, String message, Long referenceId) {
@@ -46,5 +50,13 @@ public class Notification extends BaseEntity {
 
     public void delete() {
         this.isDeleted = true;
+    }
+
+    public void markAsSent() {
+        this.notificationStatus = NotificationStatus.SENT;
+    }
+
+    public void markAsFailed() {
+        this.notificationStatus = NotificationStatus.FAILED;
     }
 }
