@@ -28,11 +28,16 @@ public class NotificationServiceImpl implements NotificationService {
         Notification notification = Notification.of(userId, type, message, referenceId);
         notificationRepository.save(notification);
 
-        messagingTemplate.convertAndSendToUser(
-                userId.toString(),
-                "/queue/notifications",
-                NotificationResponseDto.from(notification)
-        );
+        try {
+            messagingTemplate.convertAndSendToUser(
+                    userId.toString(),
+                    "/queue/notifications",
+                    NotificationResponseDto.from(notification)
+            );
+            notification.markAsSent();
+        } catch (Exception e) {
+            notification.markAsFailed();
+        }
     }
 
     public Page<NotificationResponseDto> getNotifications(Long userId, int page, int size) {
