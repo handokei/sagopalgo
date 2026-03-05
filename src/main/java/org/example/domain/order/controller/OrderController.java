@@ -13,6 +13,7 @@ import org.example.domain.order.service.OrderService;
 import org.example.global.security.jwt.CustomUserDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -85,6 +86,7 @@ public class OrderController {
     }
 
     @PatchMapping("/{id}/ship")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OrderStatusResponseDto> shipOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long id
@@ -95,6 +97,7 @@ public class OrderController {
     }
 
     @PatchMapping("/{id}/complete")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OrderStatusResponseDto> completeOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long id
