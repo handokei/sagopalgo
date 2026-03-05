@@ -106,23 +106,6 @@ public class OrderService {
 
 
     @Transactional
-    public OrderStatusResponseDto payOrder(Long userId, Long id) {
-    userRepository.findByIdAndIsDeletedFalse(userId)
-            .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
-
-        Order order = orderRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND_EXCEPTION));
-
-        order.pay();
-        order.getDelivery().prepare();
-
-        eventPublisher.publishEvent(new OrderNotificationEvent(userId, NotificationType.ORDER_PAID,
-                "결제가 완료되었습니다: " + order.getSummaryTitle(), order.getId()));
-
-        return OrderStatusResponseDto.from(order);
-    }
-
-    @Transactional
     public OrderStatusResponseDto cancelOrder(Long userId, Long id) {
         userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
