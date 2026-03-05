@@ -5,6 +5,7 @@ import org.example.domain.product.domain.model.Product;
 import org.example.domain.product.domain.repository.ProductRepository;
 import org.example.domain.product.exception.ProductErrorCode;
 import org.example.domain.product.exception.ProductException;
+import org.example.global.lock.DistributedLock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ public class StockService {
 
     private final ProductRepository productRepository;
 
+    @DistributedLock(key = "'stock:' + #productId")
     @Transactional
     public Product decreaseStock(Long productId, int quantity) {
         Product product = productRepository.findById(productId)
