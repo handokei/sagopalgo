@@ -28,16 +28,6 @@ public class KafkaConfig {
         return TopicBuilder.name("notification.order-dlt").partitions(3).replicas(1).build();
     }
 
-    @Bean
-    public NewTopic notificationProductDiscountTopic() {
-        return TopicBuilder.name("notification.product.discount").partitions(3).replicas(1).build();
-    }
-
-    @Bean
-    public NewTopic notificationProductDiscountDltTopic() {
-        return TopicBuilder.name("notification.product.discount-dlt").partitions(3).replicas(1).build();
-    }
-
     // ObjectMapper
     @Bean
     public ObjectMapper kafkaObjectMapper() {

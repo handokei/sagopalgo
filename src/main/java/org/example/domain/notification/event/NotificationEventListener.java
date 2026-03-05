@@ -2,6 +2,7 @@ package org.example.domain.notification.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.domain.notification.domain.model.NotificationType;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -14,7 +15,6 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class NotificationEventListener {
 
     private static final String ORDER_TOPIC = "notification.order";
-    private static final String DISCOUNT_TOPIC = "notification.product.discount";
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -36,16 +36,19 @@ public class NotificationEventListener {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleProductDiscountNotification(ProductDiscountNotificationEvent event) {
-        log.info("Kafka produce - topic: {}, productId: {}, userCount: {}",
-                DISCOUNT_TOPIC, event.getProductId(), event.getUserIds().size());
-        kafkaTemplate.send(DISCOUNT_TOPIC, event.getProductId().toString(), event)
-                .whenComplete((result, ex) -> {
-                    if (ex != null) {
-                        log.error("Kafka produce failed - productId: {}, error: {}",
-                                event.getProductId(), ex.getMessage());
-                    } else {
-                        log.info("Kafka produce success - offset: {}", result.getRecordMetadata().offset());
-                    }
-                });
+        log.info("Kafka produce discount - productId: {}, userCount: {}",
+                event.getProductId(), event.getUserIds().size());
+        // userId당 개별 메시지 발행 → retry 시 중복 전송 방지
+        event.getUserIds().forEach(userId -> {
+            OrderNotificationEvent orderEvent = new OrderNotificationEvent(
+                    userId, NotificationType.PRODUCT_DISCOUNT, event.getMessage(), event.getProductId());
+            kafkaTemplate.send(ORDER_TOPIC, userId.toString(), orderEvent)
+                    .whenComplete((result, ex) -> {
+                        if (ex != null) {
+                            log.error("Kafka produce failed - userId: {}, productId: {}, error: {}",
+                                    userId, event.getProductId(), ex.getMessage());
+                        }
+                    });
+        });
     }
 }
