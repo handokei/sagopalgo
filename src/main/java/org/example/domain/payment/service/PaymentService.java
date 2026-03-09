@@ -75,7 +75,7 @@ public class PaymentService {
         order.getDelivery().prepare();
 
         eventPublisher.publishEvent(new OrderNotificationEvent(userId, NotificationType.ORDER_PAID,
-                "결제가 완료되었습니다: " + order.getSummaryTitle(), order.getId()));
+                NotificationType.ORDER_PAID.getMessage() + ": " + order.getSummaryTitle(), order.getId()));
 
         log.info("결제 확인 완료 - paymentId: {}, orderId: {}", payment.getId(), order.getId());
 

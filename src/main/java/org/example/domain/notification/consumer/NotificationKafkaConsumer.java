@@ -3,6 +3,7 @@ package org.example.domain.notification.consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.notification.domain.model.NotificationType;
+import org.example.global.constants.KafkaTopics;
 import org.example.domain.notification.event.OrderNotificationEvent;
 import org.example.domain.notification.event.ProductDiscountNotificationEvent;
 import org.example.domain.notification.service.NotificationService;
@@ -26,7 +27,7 @@ public class NotificationKafkaConsumer {
             topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE,
             dltTopicSuffix = "-dlt"
     )
-    @KafkaListener(topics = "notification.order", groupId = "notification-group")
+    @KafkaListener(topics = KafkaTopics.ORDER_NOTIFICATION, groupId = "notification-group")
     public void consume(OrderNotificationEvent event) {
         log.info("Kafka consume - userId: {}, type: {}", event.getUserId(), event.getType());
         notificationService.send(event.getUserId(), event.getType(), event.getMessage(), event.getReferenceId());
@@ -45,7 +46,7 @@ public class NotificationKafkaConsumer {
             topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE,
             dltTopicSuffix = "-dlt"
     )
-    @KafkaListener(topics = "notification.product.discount", groupId = "notification-group")
+    @KafkaListener(topics = KafkaTopics.PRODUCT_DISCOUNT, groupId = "notification-group")
     public void consumeDiscount(ProductDiscountNotificationEvent event) {
         log.info("Kafka consume discount - productId: {}, userCount: {}",
                 event.getProductId(), event.getUserIds().size());

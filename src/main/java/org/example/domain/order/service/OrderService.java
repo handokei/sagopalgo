@@ -77,7 +77,7 @@ public class OrderService {
         cartService.clearCart(OwnerType.USER, userId.toString());
 
         eventPublisher.publishEvent(new OrderNotificationEvent(userId, NotificationType.ORDER_CREATED,
-                "주문이 생성되었습니다: " + order.getSummaryTitle(), order.getId()));
+                NotificationType.ORDER_CREATED.getMessage() + ": " + order.getSummaryTitle(), order.getId()));
 
         return OrderCreateResponseDto.from(order);
     }
@@ -121,13 +121,18 @@ public class OrderService {
         }
 
         eventPublisher.publishEvent(new OrderNotificationEvent(userId, NotificationType.ORDER_CANCELED,
-                "주문이 취소되었습니다: " + order.getSummaryTitle(), order.getId()));
+                NotificationType.ORDER_CANCELED.getMessage() + ": " + order.getSummaryTitle(), order.getId()));
 
         return OrderStatusResponseDto.from(order);
     }
 
+    public Page<OrderResponseDto> getAllOrders(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return orderRepository.findByIsDeletedFalse(pageable).map(OrderResponseDto::from);
+    }
+
     @Transactional
-    public OrderStatusResponseDto shipOrder(Long userId, Long id) {
+    public OrderStatusResponseDto shipOrder(Long userId, Long id, String trackingNumber) {
     userRepository.findByIdAndIsDeletedFalse(userId)
             .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
 
@@ -135,10 +140,14 @@ public class OrderService {
                 .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND_EXCEPTION));
 
         order.shipped();
-        order.getDelivery().ship();
+        if (trackingNumber != null && !trackingNumber.isBlank()) {
+            order.getDelivery().ship(trackingNumber);
+        } else {
+            order.getDelivery().ship();
+        }
 
         eventPublisher.publishEvent(new OrderNotificationEvent(userId, NotificationType.ORDER_SHIPPED,
-                "배송이 시작되었습니다: " + order.getSummaryTitle(), order.getId()));
+                NotificationType.ORDER_SHIPPED.getMessage() + ": " + order.getSummaryTitle(), order.getId()));
 
         return OrderStatusResponseDto.from(order);
     }
@@ -155,7 +164,7 @@ public class OrderService {
         order.getDelivery().complete();
 
         eventPublisher.publishEvent(new OrderNotificationEvent(userId, NotificationType.ORDER_COMPLETED,
-                "배송이 완료되었습니다: " + order.getSummaryTitle(), order.getId()));
+                NotificationType.ORDER_COMPLETED.getMessage() + ": " + order.getSummaryTitle(), order.getId()));
 
         return OrderStatusResponseDto.from(order);
     }
