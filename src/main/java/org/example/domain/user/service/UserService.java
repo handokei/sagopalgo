@@ -2,6 +2,7 @@ package org.example.domain.user.service;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.domain.sms.service.SmsService;
 import org.example.domain.user.controller.dto.*;
 import org.example.domain.user.domain.model.User;
 import org.example.domain.user.domain.repository.UserRepository;
@@ -20,10 +21,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final SmsService smsService;
 
 
     @Transactional
     public void create(UserCreateRequestDto requestDto) {
+        smsService.checkVerified(requestDto.getPhoneNumber());
+
         if (userRepository.existsByEmailAndIsDeletedFalse(requestDto.getEmail())) {
             throw new UserException(UserErrorCode.DUPLICATION_EMAIL_EXCEPTION);
         }
@@ -33,12 +37,15 @@ public class UserService {
                 encodePassword,
                 requestDto.getName(),
                 requestDto.getNickname(),
-                requestDto.getUserRole());
+                requestDto.getUserRole(),
+                requestDto.getPhoneNumber());
         userRepository.save(user);
+
+        smsService.clearVerified(requestDto.getPhoneNumber());
     }
 
     public UserReadResponseDto read(Long id) {
-        User user = userRepository.findById(id)
+        User user = userRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
 
         return UserReadResponseDto.from(user);
@@ -53,8 +60,9 @@ public class UserService {
         throw new UserException(UserErrorCode.INVALID_PASSWORD);
         }
 
-        String accessToken = jwtProvider.createAccessToken(user.getId(), user.getEmail());
-        String refreshToken = jwtProvider.createRefreshToken(user.getId(), user.getEmail());
+        String role = user.getUserRole().name();
+        String accessToken = jwtProvider.createAccessToken(user.getId(), user.getEmail(), role);
+        String refreshToken = jwtProvider.createRefreshToken(user.getId(), user.getEmail(), role);
 
         return UserLoginResponseDto.from(user.getId(), user.getName(), accessToken, refreshToken);
     }

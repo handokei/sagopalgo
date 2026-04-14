@@ -2,6 +2,7 @@ package org.example.domain.notification.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.global.constants.KafkaTopics;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -13,16 +14,14 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class NotificationEventListener {
 
-    private static final String ORDER_TOPIC = "notification.order";
-    private static final String DISCOUNT_TOPIC = "notification.product.discount";
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleOrderNotification(OrderNotificationEvent event) {
-        log.info("Kafka produce - topic: {}, userId: {}, type: {}", ORDER_TOPIC, event.getUserId(), event.getType());
-        kafkaTemplate.send(ORDER_TOPIC, event.getUserId().toString(), event)
+        log.info("Kafka produce - topic: {}, userId: {}, type: {}", KafkaTopics.ORDER_NOTIFICATION, event.getUserId(), event.getType());
+        kafkaTemplate.send(KafkaTopics.ORDER_NOTIFICATION, event.getUserId().toString(), event)
                 .whenComplete((result, ex) -> {
                     if (ex != null) {
                         log.error("Kafka produce failed - userId: {}, type: {}, error: {}",
@@ -37,8 +36,8 @@ public class NotificationEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleProductDiscountNotification(ProductDiscountNotificationEvent event) {
         log.info("Kafka produce - topic: {}, productId: {}, userCount: {}",
-                DISCOUNT_TOPIC, event.getProductId(), event.getUserIds().size());
-        kafkaTemplate.send(DISCOUNT_TOPIC, event.getProductId().toString(), event)
+                KafkaTopics.PRODUCT_DISCOUNT, event.getProductId(), event.getUserIds().size());
+        kafkaTemplate.send(KafkaTopics.PRODUCT_DISCOUNT, event.getProductId().toString(), event)
                 .whenComplete((result, ex) -> {
                     if (ex != null) {
                         log.error("Kafka produce failed - productId: {}, error: {}",

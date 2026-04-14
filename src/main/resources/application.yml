@@ -40,6 +40,9 @@ spring:
     properties:
       spring.json.trusted.packages: "*"
 
+portone:
+  api-secret: ${PORTONE_API_SECRET:test_api_secret}
+
 jwt:
   secret:
     key: ${JWT_SECRET_KEY}

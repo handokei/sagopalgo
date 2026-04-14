@@ -64,17 +64,6 @@ public class OrderController {
 
     }
 
-    //상태 수정
-    @PatchMapping("/{id}/pay")
-    public ResponseEntity<OrderStatusResponseDto> payOrder(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable Long id
-    ) {
-        Long userId = userDetails.getId();
-        OrderStatusResponseDto responseDto = orderService.payOrder(userId,id);
-        return ResponseEntity.ok().body(responseDto);
-    }
-
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<OrderStatusResponseDto> cancelOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,
