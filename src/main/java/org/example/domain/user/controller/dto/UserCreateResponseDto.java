@@ -13,6 +13,6 @@ public class UserCreateResponseDto {
 
 
     public static UserCreateResponseDto from(String email) {
-    return UserCreateResponseDto.from(email);
+        return new UserCreateResponseDto(email);
     }
 }

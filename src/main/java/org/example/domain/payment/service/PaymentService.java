@@ -13,6 +13,7 @@ import org.example.domain.payment.controller.dto.PaymentConfirmRequestDto;
 import org.example.domain.payment.controller.dto.PaymentPrepareRequestDto;
 import org.example.domain.payment.controller.dto.PaymentResponseDto;
 import org.example.domain.payment.domain.model.Payment;
+import org.example.domain.payment.domain.model.PaymentStatus;
 import org.example.domain.payment.domain.repository.PaymentRepository;
 import org.example.domain.payment.exception.PaymentErrorCode;
 import org.example.domain.payment.exception.PaymentException;
@@ -36,8 +37,12 @@ public class PaymentService {
         Order order = orderRepository.findByIdAndIsDeletedFalse(requestDto.getOrderId())
                 .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND_EXCEPTION));
 
+        // 이미 결제 완료된 주문이면 예외. FAILED/PENDING 상태면 재시도를 위해 기존 레코드 제거.
         paymentRepository.findByOrderId(order.getId()).ifPresent(p -> {
-            throw new PaymentException(PaymentErrorCode.PAYMENT_ALREADY_PAID);
+            if (p.getStatus() == PaymentStatus.PAID) {
+                throw new PaymentException(PaymentErrorCode.PAYMENT_ALREADY_PAID);
+            }
+            paymentRepository.delete(p);
         });
 
         Payment payment = Payment.of(order.getId(), userId, order.getTotalPrice());
@@ -53,6 +58,10 @@ public class PaymentService {
     public PaymentResponseDto confirm(Long userId, PaymentConfirmRequestDto requestDto) {
         Payment payment = paymentRepository.findById(requestDto.getPaymentId())
                 .orElseThrow(() -> new PaymentException(PaymentErrorCode.PAYMENT_NOT_FOUND));
+
+        if (!payment.getUserId().equals(userId)) {
+            throw new PaymentException(PaymentErrorCode.PAYMENT_FORBIDDEN);
+        }
 
         PortOneClient.PortOnePaymentResponse portOneResponse =
                 portOneClient.getPayment(requestDto.getPortOnePaymentId());

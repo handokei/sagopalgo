@@ -36,6 +36,8 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class OrderService {
 
+    private static final int MAX_PAGE_SIZE = 100;
+
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
@@ -86,7 +88,7 @@ public class OrderService {
         userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
 
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, Math.min(size, MAX_PAGE_SIZE));
 
         Page<Order> orders = orderRepository.findByUserIdAndIsDeletedFalse(userId, pageable);
 
@@ -127,7 +129,7 @@ public class OrderService {
     }
 
     public Page<OrderResponseDto> getAllOrders(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, Math.min(size, MAX_PAGE_SIZE));
         return orderRepository.findByIsDeletedFalse(pageable).map(OrderResponseDto::from);
     }
 

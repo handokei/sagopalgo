@@ -19,7 +19,6 @@ public class UserLoginRequestDto {
     private String email;
 
     @NotBlank
-    @NotBlank
     @Size(min = 8, message = "8글자 이상 입력하세요.")
     @Pattern(
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).+$",
