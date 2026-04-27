@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.global.security.auth.CustomUserDetailsService;
 import org.example.global.security.jwt.JwtAuthenticationFilter;
 import org.example.global.security.jwt.JwtProvider;
+import org.example.global.security.oauth2.CustomOAuth2UserService;
+import org.example.global.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -27,11 +29,14 @@ public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
     private final CustomUserDetailsService customUserDetailsService;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler;
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter(jwtProvider, customUserDetailsService);
     }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -49,27 +54,32 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/users/register",
                                 "/api/users/login",
+                                "/api/sms/send",
+                                "/api/sms/verify",
                                 "/api/carts/guest/**",
                                 "/api/bills/**",
                                 "/ws/**",
                                 "/actuator/**",
                                 "/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/oauth2/**",
+                                "/login/oauth2/**"
                         ).permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/products/me").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/products/**")
-                        .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/products/images/**")
-                        .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/categories/**")
-                        .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/products/*/reviews/**")
-                        .permitAll()
-                        .requestMatchers("/api/orders/**",
-                                "/api/carts/me/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/images/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/*/reviews/**").permitAll()
+                        .requestMatchers("/api/orders/**", "/api/carts/me/**").authenticated()
                         .anyRequest().authenticated()
+                )
+
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(endpoint -> endpoint
+                                .userService(customOAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler)
                 )
 
                 .addFilterBefore(

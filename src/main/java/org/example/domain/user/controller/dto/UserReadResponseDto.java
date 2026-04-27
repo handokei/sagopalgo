@@ -16,11 +16,14 @@ public class UserReadResponseDto {
 
     private String nickname;
 
+    private String userRole;
+
     public static UserReadResponseDto from(User user) {
         return new UserReadResponseDto(
                 user.getEmail(),
                 user.getName(),
-                user.getNickname()
+                user.getNickname(),
+                user.getUserRole() != null ? user.getUserRole().name() : null
         );
     }
 
