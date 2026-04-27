@@ -67,6 +67,7 @@ public class UserService {
         return UserLoginResponseDto.from(user.getId(), user.getName(), accessToken, refreshToken);
     }
 
+    @Transactional
     public UserReadResponseDto updateUser(Long userId, @Valid UserModifiedRequestDto requestDto) {
         User user = userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
@@ -78,9 +79,7 @@ public class UserService {
 
     }
 
-//    public void deleted(Long userId, @Valid UserDeletedRequestDto requestDto) {
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
-//
-//    }
+    public void logout(String accessToken) {
+        jwtProvider.blacklistToken(accessToken);
+    }
 }

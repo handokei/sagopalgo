@@ -10,7 +10,10 @@ import org.example.global.config.entity.BaseEntity;
 
 @Entity
 @Getter
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_user_email", columnList = "email"),
+        @Index(name = "idx_user_is_deleted", columnList = "isDeleted")
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 

@@ -16,13 +16,19 @@ public class RedissonConfig {
     @Value("${spring.data.redis.port}")
     private int redisPort;
 
+    @Value("${redisson.pool.min-idle:4}")
+    private int minIdle;
+
+    @Value("${redisson.pool.max-size:16}")
+    private int maxSize;
+
     @Bean
     public RedissonClient redissonClient() {
         Config config = new Config();
         config.useSingleServer()
                 .setAddress("redis://" + redisHost + ":" + redisPort)
-                .setConnectionMinimumIdleSize(1)
-                .setConnectionPoolSize(2);
+                .setConnectionMinimumIdleSize(minIdle)
+                .setConnectionPoolSize(maxSize);
         return Redisson.create(config);
     }
 }

@@ -4,8 +4,8 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.example.domain.user.controller.dto.*;
 
-
 import org.example.domain.user.service.UserService;
+import org.example.global.response.ApiResponse;
 import org.example.global.security.jwt.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,83 +18,65 @@ public class UserController {
 
     private UserService userService;
 
-    //회원가입
     @PostMapping("/register")
-    public ResponseEntity<Void> register(
+    public ResponseEntity<ApiResponse<Void>> register(
            @RequestBody @Valid UserCreateRequestDto requestDto
     ) {
         userService.create(requestDto);
-     return ResponseEntity.status(201).build();
+        return ResponseEntity.status(201).body(ApiResponse.success("회원가입 성공", null));
     }
 
-    //로그인
     @PostMapping("/login")
-    public ResponseEntity<UserLoginResponseDto> login(
+    public ResponseEntity<ApiResponse<UserLoginResponseDto>> login(
            @RequestBody @Valid UserLoginRequestDto requestDto
     ) {
-
-        UserLoginResponseDto user =  userService.login(requestDto);
-        return ResponseEntity.ok().body(user);
+        UserLoginResponseDto user = userService.login(requestDto);
+        return ResponseEntity.ok().body(ApiResponse.success("로그인 성공", user));
     }
 
-    //회원조회
     @GetMapping
-    public ResponseEntity<UserReadResponseDto> readAllUsers(
+    public ResponseEntity<ApiResponse<UserReadResponseDto>> readAllUsers(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long id = userDetails.getId();
         UserReadResponseDto userReadResponseDto = userService.read(id);
-        return ResponseEntity.ok().body(userReadResponseDto);
+        return ResponseEntity.ok().body(ApiResponse.success("회원 조회 성공", userReadResponseDto));
     }
 
-    //내 정보 조회
     @GetMapping("/me")
-    public ResponseEntity<UserReadResponseDto> getMe(
+    public ResponseEntity<ApiResponse<UserReadResponseDto>> getMe(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long id = userDetails.getId();
         UserReadResponseDto userReadResponseDto = userService.read(id);
-        return ResponseEntity.ok().body(userReadResponseDto);
+        return ResponseEntity.ok().body(ApiResponse.success("내 정보 조회 성공", userReadResponseDto));
     }
 
-    //내 정보 수정
     @PatchMapping("/me")
-    public ResponseEntity<UserReadResponseDto> updateMe(
+    public ResponseEntity<ApiResponse<UserReadResponseDto>> updateMe(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid UserModifiedRequestDto requestDto
     ) {
         Long userId = userDetails.getId();
         UserReadResponseDto userReadResponseDto = userService.updateUser(userId, requestDto);
-        return ResponseEntity.ok().body(userReadResponseDto);
+        return ResponseEntity.ok().body(ApiResponse.success("내 정보 수정 성공", userReadResponseDto));
     }
 
-    //회원수정
     @PatchMapping("/{id}")
-    public ResponseEntity<UserReadResponseDto> modifiedUser(
+    public ResponseEntity<ApiResponse<UserReadResponseDto>> modifiedUser(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid UserModifiedRequestDto requestDto
     ) {
         Long userId = userDetails.getId();
         UserReadResponseDto userReadResponseDto = userService.updateUser(userId, requestDto);
-        return ResponseEntity.ok().body(userReadResponseDto);
+        return ResponseEntity.ok().body(ApiResponse.success("회원 수정 성공", userReadResponseDto));
     }
 
-
-//    //로그아웃
-//    @PostMapping("/logout")
-//    public ResponseEntity<Void> deleted(
-//            @AuthenticationPrincipal CustomUserDetails userDetails,
-//            @RequestBody @Valid UserLogoutRequestDto requestDto) {
-//        Long userId = userDetails.getId();
-//
-//        userService.deleted(userId, requestDto);
-//        return ResponseEntity.ok().body();
-//    }
-//    )
-
-
-
-
-
-
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(
+            @RequestHeader("Authorization") String authHeader) {
+        String accessToken = authHeader.replace("Bearer ", "");
+        userService.logout(accessToken);
+        return ResponseEntity.ok().body(ApiResponse.success("로그아웃 성공", null));
+    }
 }

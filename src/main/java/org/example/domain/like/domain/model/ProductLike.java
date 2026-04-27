@@ -8,9 +8,10 @@ import org.example.global.config.entity.BaseEntity;
 
 @Getter
 @Entity
-@Table(name = "products_likes",
-uniqueConstraints = {
+@Table(name = "products_likes", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"user_id", "product_id"})
+}, indexes = {
+        @Index(name = "idx_like_user_id", columnList = "user_id")
 })
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductLike extends BaseEntity {
