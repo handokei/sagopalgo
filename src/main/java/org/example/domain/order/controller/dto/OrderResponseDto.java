@@ -15,6 +15,8 @@ public class OrderResponseDto {
 
     private Long id;
 
+    private Long userId;
+
     private String productTitle;
 
     private int totalPrice;
@@ -29,6 +31,8 @@ public class OrderResponseDto {
 
     private DeliveryStatus deliveryStatus;
 
+    private String trackingNumber;
+
     private LocalDateTime createAt;
 
 
@@ -36,6 +40,7 @@ public class OrderResponseDto {
         Delivery delivery = order.getDelivery();
         return new OrderResponseDto(
                 order.getId(),
+                order.getUserId(),
                 order.getSummaryTitle(),
                 order.getTotalPrice(),
                 order.getOrderStatus(),
@@ -43,6 +48,7 @@ public class OrderResponseDto {
                 delivery != null ? delivery.getPhoneNumber() : null,
                 delivery != null ? delivery.getAddress() : null,
                 delivery != null ? delivery.getStatus() : null,
+                delivery != null ? delivery.getTrackingNumber() : null,
                 order.getCreatedAt()
         );
     }

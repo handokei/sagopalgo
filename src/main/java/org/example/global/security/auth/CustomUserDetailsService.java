@@ -20,7 +20,7 @@ public class CustomUserDetailsService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
-        String roleName = "ROLE_" + user.getUserRole().name();
+        String roleName = user.getUserRole().name();
 
         return new CustomUserDetails(
                 user.getId(),

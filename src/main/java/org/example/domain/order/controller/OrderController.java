@@ -8,6 +8,7 @@ import org.example.domain.order.controller.dto.OrderCreateRequestDto;
 import org.example.domain.order.controller.dto.OrderCreateResponseDto;
 import org.example.domain.order.controller.dto.OrderResponseDto;
 import org.example.domain.order.controller.dto.OrderStatusResponseDto;
+import org.example.domain.order.controller.dto.ShipOrderRequestDto;
 import org.example.domain.order.service.OrderFacade;
 import org.example.domain.order.service.OrderService;
 import org.example.global.security.jwt.CustomUserDetails;
@@ -74,14 +75,26 @@ public class OrderController {
         return ResponseEntity.ok().body(responseDto);
     }
 
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<OrderResponseDto>> getAllOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        Page<OrderResponseDto> responseDto = orderService.getAllOrders(page, size);
+        return ResponseEntity.ok().body(responseDto);
+    }
+
     @PatchMapping("/{id}/ship")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<OrderStatusResponseDto> shipOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable Long id
+            @PathVariable Long id,
+            @RequestBody(required = false) ShipOrderRequestDto requestDto
     ) {
         Long userId = userDetails.getId();
-        OrderStatusResponseDto responseDto = orderService.shipOrder(userId, id);
+        String trackingNumber = requestDto != null ? requestDto.getTrackingNumber() : null;
+        OrderStatusResponseDto responseDto = orderService.shipOrder(userId, id, trackingNumber);
         return ResponseEntity.ok().body(responseDto);
     }
 

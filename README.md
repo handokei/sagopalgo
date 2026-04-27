@@ -648,15 +648,41 @@ failed_orders:      0
 
 **OrderFacade 패턴 적용**
 
+> `@DistributedLock` AOP 방식은 단일 키만 표현 가능하여, 다중 상품 주문 시 첫 번째 상품만 보호되는 한계가 있다.
+> 모든 상품에 락을 적용하기 위해 Facade에서 `RLock`을 직접 관리한다.
+> 데드락 방지를 위해 productId를 오름차순 정렬 후 순서대로 락을 획득한다.
+
 ```java
 // ✅ OrderFacadeImpl - 락만 담당, @Transactional 없음
 @Component
+@RequiredArgsConstructor
 public class OrderFacadeImpl implements OrderFacade {
 
+    private final OrderService orderService;
+    private final RedissonClient redissonClient;
+
     @Override
-    @DistributedLock(key = "'product:' + #requestDto.items[0].productId")
     public OrderCreateResponseDto createOrder(Long userId, OrderCreateRequestDto requestDto) {
-        return orderService.createOrder(userId, requestDto); // 내부에서 트랜잭션 열고 커밋
+        // 데드락 방지: productId 오름차순 정렬 후 순서대로 락 획득
+        List<RLock> locks = requestDto.getItems().stream()
+            .map(OrderItemDto::getProductId)
+            .distinct()
+            .sorted()
+            .map(id -> redissonClient.getLock("product:" + id))
+            .toList();
+
+        try {
+            for (RLock lock : locks) {
+                lock.lock(5, TimeUnit.SECONDS);
+            }
+            return orderService.createOrder(userId, requestDto);
+        } finally {
+            for (int i = locks.size() - 1; i >= 0; i--) {
+                if (locks.get(i).isHeldByCurrentThread()) {
+                    locks.get(i).unlock();
+                }
+            }
+        }
     }
 }
 
@@ -693,6 +719,7 @@ public OrderCreateResponseDto createOrder(Long userId, OrderCreateRequestDto req
 - **분산락을 적용했다고 끝이 아니다**: 락이 언제 해제되는지가 더 중요하다. 트랜잭션 커밋 전에 락이 풀리는 순간 락은 유명무실해진다.
 - **AOP는 순서가 곧 동작이다**: Spring AOP에서 어드바이스 실행 순서를 정확히 파악하지 않으면 의도와 다르게 동작할 수 있다.
 - **계층 분리는 설계 원칙이 아니라 버그 방지책이다**: OrderFacade 패턴이 단순히 클린 아키텍처를 위한 것이 아니라, 타이밍 버그 자체를 구조적으로 막아준다는 것을 실제로 경험했다.
+- **AOP 기반 분산락은 단일 키만 표현 가능하다**: `@DistributedLock`은 단일 상품 보호엔 충분하지만, 다중 상품 주문처럼 여러 락이 필요한 경우엔 `RLock`을 직접 관리해야 한다. 또한 정렬된 순서로 락을 획득하지 않으면 데드락이 발생할 수 있다.
 
 ---
 
