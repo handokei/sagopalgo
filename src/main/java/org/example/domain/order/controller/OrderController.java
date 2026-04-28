@@ -1,9 +1,7 @@
 package org.example.domain.order.controller;
 
-
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-
 import org.example.domain.order.controller.dto.OrderCreateRequestDto;
 import org.example.domain.order.controller.dto.OrderCreateResponseDto;
 import org.example.domain.order.controller.dto.OrderResponseDto;
@@ -26,43 +24,33 @@ public class OrderController {
     private final OrderService orderService;
     private final OrderFacade orderFacade;
 
-    //주문 생성
     @PostMapping
     public ResponseEntity<OrderCreateResponseDto> create(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid OrderCreateRequestDto requestDto
-            ) {
+    ) {
         Long userId = userDetails.getId();
         OrderCreateResponseDto responseDto = orderFacade.createOrder(userId, requestDto);
         return ResponseEntity.status(201).body(responseDto);
     }
 
-
-    //다건 조회
     @GetMapping
     public ResponseEntity<Page<OrderResponseDto>> getOrders(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
-
     ) {
         Long userId = userDetails.getId();
-        Page<OrderResponseDto> responseDto = orderService.getOrders(userId, page, size);
-
-        return ResponseEntity.ok().body(responseDto);
-
+        return ResponseEntity.ok().body(orderService.getOrders(userId, page, size));
     }
 
-    //단건 조회
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponseDto> getOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long id
     ) {
         Long userId = userDetails.getId();
-        OrderResponseDto responseDto = orderService.getOrder(userId, id);
-        return ResponseEntity.ok().body(responseDto);
-
+        return ResponseEntity.ok().body(orderService.getOrder(userId, id));
     }
 
     @PatchMapping("/{id}/cancel")
@@ -71,8 +59,7 @@ public class OrderController {
             @PathVariable Long id
     ) {
         Long userId = userDetails.getId();
-        OrderStatusResponseDto responseDto = orderService.cancelOrder(userId, id);
-        return ResponseEntity.ok().body(responseDto);
+        return ResponseEntity.ok().body(orderFacade.cancelOrder(userId, id));
     }
 
     @GetMapping("/all")
@@ -81,8 +68,7 @@ public class OrderController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        Page<OrderResponseDto> responseDto = orderService.getAllOrders(page, size);
-        return ResponseEntity.ok().body(responseDto);
+        return ResponseEntity.ok().body(orderService.getAllOrders(page, size));
     }
 
     @PatchMapping("/{id}/ship")
@@ -94,8 +80,7 @@ public class OrderController {
     ) {
         Long userId = userDetails.getId();
         String trackingNumber = requestDto != null ? requestDto.getTrackingNumber() : null;
-        OrderStatusResponseDto responseDto = orderService.shipOrder(userId, id, trackingNumber);
-        return ResponseEntity.ok().body(responseDto);
+        return ResponseEntity.ok().body(orderFacade.shipOrder(userId, id, trackingNumber));
     }
 
     @PatchMapping("/{id}/complete")
@@ -103,14 +88,8 @@ public class OrderController {
     public ResponseEntity<OrderStatusResponseDto> completeOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long id
-    )     {
+    ) {
         Long userId = userDetails.getId();
-        OrderStatusResponseDto responseDto = orderService.completeOrder(userId, id);
-        return ResponseEntity.ok().body(responseDto);
-
+        return ResponseEntity.ok().body(orderFacade.completeOrder(userId, id));
     }
-
-
-
-
 }

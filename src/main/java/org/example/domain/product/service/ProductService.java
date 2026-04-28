@@ -45,6 +45,11 @@ public class ProductService {
     private final ProductCacheService productCacheService;
 
 
+    public Product findProduct(Long productId) {
+        return productRepository.findByIdAndIsDeletedFalse(productId)
+                .orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND_EXCEPTION));
+    }
+
     @Transactional
     public ProductCreateResponseDto createProduct(Long userId, @Valid ProductCreateRequestDto requestDto) {
         var seller = userRepository.findByIdAndIsDeletedFalse(userId)
