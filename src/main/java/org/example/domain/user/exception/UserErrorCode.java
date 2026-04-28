@@ -15,7 +15,8 @@ public enum UserErrorCode implements ErrorCode{
     INVALID_NAME(HttpStatus.BAD_REQUEST, "이름은 필수입니다." ),
     INVALID_NICKNAME(HttpStatus.BAD_REQUEST, "닉네임은 필수입니다." ),
     INVALID_ROLE(HttpStatus.BAD_REQUEST, "역할은 필수입니다." ),
-    INVALID_PROVIDER(HttpStatus.BAD_REQUEST, "OAuth2 provider 정보는 필수입니다." );
+    INVALID_PROVIDER(HttpStatus.BAD_REQUEST, "OAuth2 provider 정보는 필수입니다."),
+    INVALID_AUTH_CODE(HttpStatus.UNAUTHORIZED, "유효하지 않거나 만료된 인증 코드입니다.");
 
 
     private final HttpStatus status;
