@@ -22,9 +22,9 @@ public @interface DistributedLock {
     long waitTime() default 5L;
 
     /**
-     * 락 유지 시간 (기본 3초)
+     * 락 유지 시간 (기본 10초)
      */
-    long leaseTime() default 3L;
+    long leaseTime() default 10L;
 
     /**
      * 시간 단위 (기본 초)

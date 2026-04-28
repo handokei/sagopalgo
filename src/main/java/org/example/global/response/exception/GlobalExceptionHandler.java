@@ -82,7 +82,7 @@ public class GlobalExceptionHandler {
 
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(
                 httpStatus,
-                e.getMessage()
+                "서버 내부 오류가 발생했습니다."
         );
 
         return ResponseEntity

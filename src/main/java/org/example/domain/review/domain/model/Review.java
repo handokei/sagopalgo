@@ -11,6 +11,8 @@ import org.example.global.config.entity.BaseEntity;
 @Entity
 @Table(name = "reviews", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"user_id", "product_id"})
+}, indexes = {
+        @Index(name = "idx_review_product_id", columnList = "product_id")
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter

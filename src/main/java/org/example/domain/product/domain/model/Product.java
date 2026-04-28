@@ -14,7 +14,11 @@ import org.example.domain.product.exception.ProductErrorCode;
 import org.example.domain.product.exception.ProductException;
 
 @Entity
-@Table(name = "products")
+@Table(name = "products", indexes = {
+        @Index(name = "idx_product_seller_id", columnList = "seller_id"),
+        @Index(name = "idx_product_category_id", columnList = "category_id"),
+        @Index(name = "idx_product_is_deleted", columnList = "isDeleted")
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Product extends BaseEntity {

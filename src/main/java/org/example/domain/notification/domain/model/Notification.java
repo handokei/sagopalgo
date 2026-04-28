@@ -7,7 +7,10 @@ import lombok.NoArgsConstructor;
 import org.example.global.config.entity.BaseEntity;
 
 @Entity
-@Table(name = "notifications")
+@Table(name = "notifications", indexes = {
+        @Index(name = "idx_notification_user_id", columnList = "userId"),
+        @Index(name = "idx_notification_is_read", columnList = "isRead")
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Notification extends BaseEntity {

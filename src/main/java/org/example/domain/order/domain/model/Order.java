@@ -14,7 +14,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "orders", indexes = {
+        @Index(name = "idx_order_user_id", columnList = "userId"),
+        @Index(name = "idx_order_is_deleted", columnList = "isDeleted")
+})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order extends BaseEntity {

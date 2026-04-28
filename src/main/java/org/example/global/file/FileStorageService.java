@@ -46,7 +46,7 @@ public class FileStorageService {
 
     public void delete(String fileName) {
         try {
-            Path filePath = this.uploadPath.resolve(fileName).normalize();
+            Path filePath = resolveAndValidate(fileName);
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
             throw new RuntimeException("파일 삭제에 실패했습니다: " + fileName, e);
@@ -54,7 +54,15 @@ public class FileStorageService {
     }
 
     public Path getFilePath(String fileName) {
-        return this.uploadPath.resolve(fileName).normalize();
+        return resolveAndValidate(fileName);
+    }
+
+    private Path resolveAndValidate(String fileName) {
+        Path filePath = this.uploadPath.resolve(fileName).normalize();
+        if (!filePath.startsWith(this.uploadPath)) {
+            throw new SecurityException("잘못된 파일 경로입니다.");
+        }
+        return filePath;
     }
 
     private String getExtension(String fileName) {
