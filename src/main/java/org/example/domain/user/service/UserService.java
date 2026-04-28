@@ -44,6 +44,11 @@ public class UserService {
         smsService.clearVerified(requestDto.getPhoneNumber());
     }
 
+    public void validateUserExists(Long userId) {
+        userRepository.findByIdAndIsDeletedFalse(userId)
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));
+    }
+
     public UserReadResponseDto read(Long id) {
         User user = userRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND_EXCEPTION));

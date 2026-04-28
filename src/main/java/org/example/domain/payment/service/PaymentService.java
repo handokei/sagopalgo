@@ -5,9 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.domain.notification.domain.model.NotificationType;
 import org.example.domain.notification.event.OrderNotificationEvent;
 import org.example.domain.order.domain.model.Order;
-import org.example.domain.order.domain.repository.OrderRepository;
-import org.example.domain.order.exception.OrderErrorCode;
-import org.example.domain.order.exception.OrderException;
+import org.example.domain.order.service.OrderService;
 import org.example.domain.payment.client.PortOneClient;
 import org.example.domain.payment.controller.dto.PaymentConfirmRequestDto;
 import org.example.domain.payment.controller.dto.PaymentPrepareRequestDto;
@@ -28,16 +26,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final OrderRepository orderRepository;
+    private final OrderService orderService;
     private final PortOneClient portOneClient;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public PaymentResponseDto prepare(Long userId, PaymentPrepareRequestDto requestDto) {
-        Order order = orderRepository.findByIdAndIsDeletedFalse(requestDto.getOrderId())
-                .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND_EXCEPTION));
+        Order order = orderService.findOrder(requestDto.getOrderId());
 
-        // 이미 결제 완료된 주문이면 예외. FAILED/PENDING 상태면 재시도를 위해 기존 레코드 제거.
         paymentRepository.findByOrderId(order.getId()).ifPresent(p -> {
             if (p.getStatus() == PaymentStatus.PAID) {
                 throw new PaymentException(PaymentErrorCode.PAYMENT_ALREADY_PAID);
@@ -78,11 +74,9 @@ public class PaymentService {
 
         payment.confirm(requestDto.getPortOnePaymentId());
 
-        Order order = orderRepository.findByIdAndIsDeletedFalse(payment.getOrderId())
-                .orElseThrow(() -> new OrderException(OrderErrorCode.ORDER_NOT_FOUND_EXCEPTION));
-        order.pay();
-        order.getDelivery().prepare();
+        orderService.payOrder(payment.getOrderId());
 
+        Order order = orderService.findOrder(payment.getOrderId());
         eventPublisher.publishEvent(new OrderNotificationEvent(userId, NotificationType.ORDER_PAID,
                 NotificationType.ORDER_PAID.getMessage() + ": " + order.getSummaryTitle(), order.getId()));
 
