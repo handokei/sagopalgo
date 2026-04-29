@@ -3,7 +3,9 @@ package org.example.domain.product.controller;
 import lombok.RequiredArgsConstructor;
 import org.example.domain.product.controller.dto.ProductImageResponseDto;
 import org.example.domain.product.service.ProductImageService;
+import org.example.global.file.LocalFileStorageService;
 import org.example.global.security.jwt.CustomUserDetails;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/products")
@@ -23,6 +26,9 @@ import java.util.List;
 public class ProductImageController {
 
     private final ProductImageService productImageService;
+
+    @Autowired(required = false)
+    private LocalFileStorageService localFileStorageService;
 
     @PostMapping("/{productId}/images")
     public ResponseEntity<List<ProductImageResponseDto>> uploadImages(
@@ -52,8 +58,11 @@ public class ProductImageController {
 
     @GetMapping("/images/{fileName}")
     public ResponseEntity<Resource> getImage(@PathVariable String fileName) {
+        if (localFileStorageService == null) {
+            return ResponseEntity.notFound().build();
+        }
         try {
-            Path filePath = productImageService.getImagePath(fileName);
+            Path filePath = localFileStorageService.getFilePath(fileName);
             Resource resource = new UrlResource(filePath.toUri());
 
             if (resource.exists() && resource.isReadable()) {

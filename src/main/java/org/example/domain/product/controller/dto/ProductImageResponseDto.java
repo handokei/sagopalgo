@@ -14,10 +14,10 @@ public class ProductImageResponseDto {
     private int sortOrder;
     private boolean isMain;
 
-    public static ProductImageResponseDto from(ProductImage image) {
+    public static ProductImageResponseDto from(ProductImage image, String imageUrl) {
         return new ProductImageResponseDto(
                 image.getId(),
-                "/api/products/images/" + image.getImageUrl(),
+                imageUrl,
                 image.getOriginalFileName(),
                 image.getSortOrder(),
                 image.isMain()

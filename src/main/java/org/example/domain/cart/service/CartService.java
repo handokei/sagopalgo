@@ -17,6 +17,7 @@ import org.example.domain.product.domain.model.Product;
 import org.example.domain.product.domain.model.ProductStatus;
 import org.example.domain.product.domain.repository.ProductImageRepository;
 import org.example.domain.product.service.ProductService;
+import org.example.global.file.FileStorageService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +35,7 @@ public class CartService {
 
     private final ProductService productService;
     private final ProductImageRepository productImageRepository;
+    private final FileStorageService fileStorageService;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
 
@@ -76,7 +78,7 @@ public class CartService {
                         Product product = productService.findProduct(cartItem.getProductId());
                         String imageUrl = productImageRepository
                                 .findByProductIdAndIsMainTrueAndIsDeletedFalse(product.getId())
-                                .map(img -> img.getImageUrl())
+                                .map(img -> fileStorageService.getFileUrl(img.getImageUrl()))
                                 .orElse(null);
                         return CartResponseDto.from(cartItem, product.getTitle(), product.getPrice(), imageUrl);
                     } catch (Exception e) {

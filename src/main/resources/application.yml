@@ -46,6 +46,17 @@ spring:
     properties:
       spring.json.trusted.packages: "org.example.domain.*"
 
+cloud:
+  aws:
+    s3:
+      bucket: ${S3_BUCKET:sagopalgo-images}
+      region: ${AWS_REGION:ap-northeast-2}
+    cloudfront:
+      domain: ${CLOUDFRONT_DOMAIN:}
+    credentials:
+      access-key: ${AWS_ACCESS_KEY_ID:}
+      secret-key: ${AWS_SECRET_ACCESS_KEY:}
+
 portone:
   api-secret: ${PORTONE_API_SECRET:test_api_secret}
 
