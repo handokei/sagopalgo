@@ -5,7 +5,6 @@ import org.example.domain.product.domain.model.Product;
 import org.example.domain.product.domain.repository.ProductRepository;
 import org.example.domain.product.exception.ProductErrorCode;
 import org.example.domain.product.exception.ProductException;
-import org.example.global.lock.DistributedLock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,7 +14,7 @@ public class StockService {
 
     private final ProductRepository productRepository;
 
-    @DistributedLock(key = "'stock:' + #productId")
+    // 분산락은 OrderFacadeImpl이 담당한다(다중 상품 정렬 락 + 커밋 이후 해제).
     @Transactional
     public Product decreaseStock(Long productId, int quantity) {
         Product product = productRepository.findById(productId)

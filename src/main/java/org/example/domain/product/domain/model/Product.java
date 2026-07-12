@@ -53,6 +53,11 @@ public class Product extends BaseEntity {
 
     private boolean isDeleted = false;
 
+    // 낙관적 락: 분산락 leaseTime 만료 등으로 동시 재고 수정이 발생해도
+    // 커밋 충돌 시 하나를 OptimisticLockException으로 실패시켜 lost update를 최종 차단한다.
+    @Version
+    private Long version;
+
     private Product(User seller, String title, String contents, int price, int stock, ProductStatus productStatus, Category category) {
         if (seller == null) {
             throw new ProductException(ProductErrorCode.SELLER_REQUIRED);
