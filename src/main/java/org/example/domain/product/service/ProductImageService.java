@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +51,7 @@ public class ProductImageService {
             );
 
             productImageRepository.save(image);
-            result.add(ProductImageResponseDto.from(image));
+            result.add(ProductImageResponseDto.from(image, fileStorageService.getFileUrl(storedFileName)));
 
             if (isMain) {
                 hasMainImage = true;
@@ -82,11 +81,7 @@ public class ProductImageService {
     public List<ProductImageResponseDto> getImages(Long productId) {
         List<ProductImage> images = productImageRepository.findByProductIdAndIsDeletedFalseOrderBySortOrderAsc(productId);
         return images.stream()
-                .map(ProductImageResponseDto::from)
+                .map(image -> ProductImageResponseDto.from(image, fileStorageService.getFileUrl(image.getImageUrl())))
                 .toList();
-    }
-
-    public Path getImagePath(String fileName) {
-        return fileStorageService.getFilePath(fileName);
     }
 }
